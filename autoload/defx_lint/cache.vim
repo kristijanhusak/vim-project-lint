@@ -1,24 +1,29 @@
-function! defx_lint#cache#put(node, is_invalid) abort
-  let g:defx_lint#cache[a:node] = a:is_invalid
-endfunction
+function! defx_lint#cache#set(node, is_invalid) abort
+  call s:cache(a:node, a:is_invalid)
+  let l:dir = fnamemodify(a:node, ':h')
 
-function! defx_lint#cache#remove(node) abort
-  call s:remove_from_cache(a:node)
-
-  let l:index = index(g:defx_lint#nodes, a:node)
-  if l:index > -1
-    call remove(g:defx_lint#nodes, l:index)
+  if l:dir ==? getcwd()
+    return
   endif
 
-  for l:path in keys(g:defx_lint#cache)
-    if escape(a:node, '/') =~? printf('^%s', escape(l:path, '/'))
-      call s:remove_from_cache(l:path)
-    endif
-  endfor
+  while l:dir !=? getcwd()
+    call s:cache(l:dir, a:is_invalid)
+    let l:dir = fnamemodify(l:dir, ':h')
+  endwhile
 endfunction
 
-function s:remove_from_cache(item) abort
-  if has_key(g:defx_lint#cache, a:item)
-    call remove(g:defx_lint#cache, a:item)
+function s:cache(node, is_invalid) abort
+  if !has_key(g:defx_lint#cache, a:node)
+    let g:defx_lint#cache[a:node] = a:is_invalid ? 1 : 0
+    return
+  endif
+
+  if a:is_invalid
+    let g:defx_lint#cache[a:node] += 1
+    return
+  endif
+
+  if g:defx_lint#cache[a:node] > 0
+    let g:defx_lint#cache[a:node] -= 1
   endif
 endfunction

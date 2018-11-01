@@ -1,4 +1,3 @@
-let g:defx_lint#nodes = []
 let g:defx_lint#cache = {}
 let g:defx_lint#status = {
       \ 'running': v:false,

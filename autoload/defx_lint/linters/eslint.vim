@@ -45,6 +45,10 @@ function! s:eslint.FileCmd(file) abort
 endfunction
 
 function! s:eslint.Parse(item) abort
+  if matchstr(a:item, ':') ==? ''
+    return ''
+  endif
+
   let l:items = split(a:item, ':')
   if len(l:items) > 0
     return l:items[0]

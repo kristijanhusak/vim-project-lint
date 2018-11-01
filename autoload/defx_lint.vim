@@ -50,20 +50,17 @@ function! s:on_stdout(linter, id, message, event) abort
       continue
     endif
 
-    if index(g:defx_lint#nodes, l:item) < 0
-      call add(g:defx_lint#nodes, l:item)
-      call defx_lint#cache#put(l:item, v:true)
-    endif
+    call defx_lint#cache#set(l:item, v:true)
   endfor
 endfunction
 
 function! s:on_file_stdout(linter, file, id, message, event) dict
-  if !has_key(self, 'remove_from_cache')
-    let self.remove_from_cache = v:true
+  if !has_key(self, 'is_file_valid')
+    let self.is_file_valid = v:true
   endif
   if a:event ==? 'exit'
-    if self.remove_from_cache
-      call defx_lint#cache#remove(a:file)
+    if self.is_file_valid
+      call defx_lint#cache#set(a:file, v:false)
     endif
     let g:defx_lint#status.running = v:false
     call defx_lint#utils#echo_line('Finished linting file.')
@@ -82,13 +79,10 @@ function! s:on_file_stdout(linter, file, id, message, event) dict
     endif
 
     if l:item ==? a:file
-      let self.remove_from_cache = v:false
+      let self.is_file_valid = v:false
     endif
 
-    if index(g:defx_lint#nodes, l:item) < 0
-      call add(g:defx_lint#nodes, l:item)
-      call defx_lint#cache#put(l:item, v:true)
-    endif
+    call defx_lint#cache#set(l:item, v:true)
   endfor
 endfunction
 

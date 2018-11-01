@@ -15,41 +15,36 @@ class Column(Base):
         super().__init__(vim)
         self.name = 'lint'
         self.column_length = 2
+        self.icon = '✗'
+        self.color = 'guifg=#fb4934 ctermfg=167'
 
     def get(self, context: Context, candidate: dict) -> str:
         default = self.format('')
-        if candidate.get('is_root', False):
+        status = self.vim.vars['defx_lint#status']
+        if status['running'] or candidate.get('is_root', False):
             return default
 
-        nodes = set(self.vim.vars['defx_lint#nodes'])
-        if not nodes:
+        cache = self.vim.vars['defx_lint#cache']
+        if not cache:
             return default
 
         path = str(candidate['action__path'])
-        cache = self.vim.vars['defx_lint#cache']
-
         if path in cache:
-            return self.format('x' if cache[path] else '')
+            return self.format(self.icon if cache[path] else '')
 
-        entry = self.find_in_nodes(nodes, path, candidate['is_directory'])
-
-        if not entry:
-            self.vim.call('defx_lint#cache#put', path, False)
-            return default
-
-        self.vim.call('defx_lint#cache#put', path, True)
-        return self.format('x')
+        return default
 
     def length(self, context: Context) -> int:
         return self.column_length
 
-    def find_in_nodes(self, data, path: str, is_dir: bool) -> str:
-        path += '/' if is_dir else ''
-        for item in data:
-            if item.startswith(path):
-                return item
-
-        return ''
-
     def format(self, column: str) -> str:
         return format(column, f'<{self.column_length}')
+
+    def highlight(self) -> None:
+        self.vim.command(('syntax match {0}_{1} /[{2}]/ ' +
+                          'contained containedin={0}').format(
+                              self.syntax_name, self.name, self.icon
+                          ))
+        self.vim.command('highlight default {0}_{1} {2}'.format(
+            self.syntax_name, self.name, self.color
+        ))
