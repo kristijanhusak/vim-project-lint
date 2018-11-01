@@ -30,3 +30,15 @@ function! defx_lint#utils#parse_unix(item, ...) abort
 
   return printf('%s/%s', getcwd(), l:items[0])
 endfunction
+
+function! defx_lint#utils#find_extension(extension) abort
+  if executable('rg')
+    return systemlist(printf("rg --files --glob '**/*.%s'", a:extension))
+  endif
+
+  if executable('ag')
+    return systemlist(printf('ag -g "^.*\.%s$"', a:extension))
+  endif
+
+  return glob(printf('**/*.%s', a:extension), v:false, v:true)
+endfunction

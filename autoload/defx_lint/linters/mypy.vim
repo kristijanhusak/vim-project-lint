@@ -11,7 +11,7 @@ function! s:mypy.New() abort
 endfunction
 
 function! s:mypy.Detect() abort
-  let self.files = glob('**/*.py', v:false, v:true)
+  let self.files = defx_lint#utils#find_extension('py')
   return len(self.files) > 0 && self.Executable()
 endfunction
 
@@ -35,7 +35,7 @@ function! s:mypy.Cmd() abort
 
   let l:target = '.'
   if len(self.files) > 0
-    let l:target = fnamemodify(self.files[0], ':h')
+    let l:target = fnamemodify(self.files[0], ':p:h')
   endif
 
   return printf('%s %s %s', self.cmd, self.cmd_args, l:target)

@@ -11,7 +11,7 @@ function! s:govet.New() abort
 endfunction
 
 function! s:govet.Detect() abort
-  return len(glob('**/*.go', v:false, v:true)) > 0 && self.Executable()
+  return len(defx_lint#utils#find_extension('go')) > 0 && self.Executable()
 endfunction
 
 function! s:govet.DetectForFile() abort
