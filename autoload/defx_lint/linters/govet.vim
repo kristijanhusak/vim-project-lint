@@ -5,11 +5,16 @@ function! s:govet.New() abort
   let l:instance.name = 'govet'
   let l:instance.cmd = ''
   let l:instance.stream = 'stderr'
+  let l:instance.filetype = ['go']
   return l:instance
 endfunction
 
 function! s:govet.Detect() abort
   return len(glob('**/*.go', v:false, v:true)) > 0 && self.Executable() !=? ''
+endfunction
+
+function! s:govet.DetectForFile() abort
+  return index(self.filetype, &filetype) > -1
 endfunction
 
 function! s:govet.Executable() abort

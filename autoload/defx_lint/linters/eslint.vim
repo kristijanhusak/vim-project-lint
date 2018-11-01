@@ -5,11 +5,16 @@ function! s:eslint.New() abort
   let l:instance.name = 'eslint'
   let l:instance.cmd = ''
   let l:instance.stream = 'stdout'
+  let l:instance.filetype = ['javascript', 'javascript.jsx']
   return l:instance
 endfunction
 
 function! s:eslint.Detect() abort
   return filereadable(printf('%s/package.json', getcwd())) && self.Executable() !=? ''
+endfunction
+
+function! s:eslint.DetectForFile() abort
+  return index(self.filetype, &filetype) > -1
 endfunction
 
 function! s:eslint.Executable() abort

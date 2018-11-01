@@ -19,7 +19,7 @@ endfunction
 function! defx_lint#run_file(file) abort
   for l:linter_name in keys(g:defx_lint#linters)
     let l:linter = g:defx_lint#linters[l:linter_name]
-    if l:linter.Detect()
+    if l:linter.DetectForFile()
       call defx_lint#utils#set_statusline(printf('Linting file with %s...', l:linter.name))
       let g:defx_lint#status.running = v:true
       call defx_lint#job#start(l:linter.FileCmd(a:file), {
