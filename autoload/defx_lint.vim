@@ -5,7 +5,7 @@ function! defx_lint#run() abort
   for l:linter_name in keys(g:defx_lint#linters)
     let l:linter = g:defx_lint#linters[l:linter_name]
     if l:linter.Detect()
-      call defx_lint#utils#echo_line(printf('Linting project with %s...', l:linter.name))
+      call defx_lint#utils#set_statusline(printf('Linting project with %s...', l:linter.name))
       let g:defx_lint#status.running = v:true
       call defx_lint#job#start(l:linter.Cmd(), {
             \ 'on_stdout': function('s:on_stdout', [l:linter]),
@@ -20,7 +20,7 @@ function! defx_lint#run_file(file) abort
   for l:linter_name in keys(g:defx_lint#linters)
     let l:linter = g:defx_lint#linters[l:linter_name]
     if l:linter.Detect()
-      call defx_lint#utils#echo_line(printf('Linting file with %s...', l:linter.name))
+      call defx_lint#utils#set_statusline(printf('Linting file with %s...', l:linter.name))
       let g:defx_lint#status.running = v:true
       call defx_lint#job#start(l:linter.FileCmd(a:file), {
             \ 'on_stdout': function('s:on_file_stdout', [l:linter, a:file]),
@@ -35,7 +35,7 @@ function! s:on_stdout(linter, id, message, event) abort
   if a:event ==? 'exit'
     let g:defx_lint#status.running = v:false
     let g:defx_lint#status.finished = v:true
-    call defx_lint#utils#echo_line('Finished.')
+    call defx_lint#utils#set_statusline('')
     call defx_lint#redraw()
     return
   endif
@@ -63,7 +63,7 @@ function! s:on_file_stdout(linter, file, id, message, event) dict
       call defx_lint#cache#set(a:file, v:false)
     endif
     let g:defx_lint#status.running = v:false
-    call defx_lint#utils#echo_line('Finished linting file.')
+    call defx_lint#utils#set_statusline('')
     call defx_lint#redraw()
     return
   endif

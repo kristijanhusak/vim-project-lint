@@ -7,6 +7,10 @@ let g:defx_lint#linters = {}
 
 runtime! autoload/defx_lint/linters/*.vim
 
+function defx_lint#statusline()
+  return defx_lint#utils#get_statusline()
+endfunction
+
 augroup defx_lint
   autocmd VimEnter * call defx_lint#run()
   autocmd BufWritePost * call defx_lint#run_file(expand('<afile>:p'))
