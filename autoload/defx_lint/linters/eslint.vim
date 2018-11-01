@@ -4,13 +4,14 @@ function! s:eslint.New() abort
   let l:instance = copy(self)
   let l:instance.name = 'eslint'
   let l:instance.cmd = ''
+  let l:instance.cmd_args = get(g:, 'defx_lint#linter_args.eslint', '')
   let l:instance.stream = 'stdout'
   let l:instance.filetype = ['javascript', 'javascript.jsx']
   return l:instance
 endfunction
 
 function! s:eslint.Detect() abort
-  return filereadable(printf('%s/package.json', getcwd())) && self.Executable() !=? ''
+  return filereadable(printf('%s/package.json', getcwd())) && self.Executable()
 endfunction
 
 function! s:eslint.DetectForFile() abort
@@ -22,15 +23,15 @@ function! s:eslint.Executable() abort
   let l:global = 'eslint'
   if executable(l:local)
     let self.cmd = l:local
-    return l:local
+    return v:true
   endif
 
   if executable(l:global)
     let self.cmd = l:global
-    return l:global
+    return v:true
   endif
 
-  return ''
+  return v:false
 endfunction
 
 function! s:eslint.Cmd() abort
@@ -38,7 +39,7 @@ function! s:eslint.Cmd() abort
     return ''
   endif
 
-  return printf('%s --format=unix .', self.cmd)
+  return printf('%s --format=unix %s .', self.cmd, self.cmd_args)
 endfunction
 
 function! s:eslint.FileCmd(file) abort
@@ -50,16 +51,7 @@ function! s:eslint.FileCmd(file) abort
 endfunction
 
 function! s:eslint.Parse(item) abort
-  if matchstr(a:item, ':') ==? ''
-    return ''
-  endif
-
-  let l:items = split(a:item, ':')
-  if len(l:items) > 0
-    return l:items[0]
-  endif
-
-  return ''
+  return defx_lint#utils#parse_unix(a:item)
 endfunction
 
 call defx_lint#add_linter(s:eslint.New())

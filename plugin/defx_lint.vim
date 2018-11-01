@@ -4,6 +4,7 @@ let g:defx_lint#status = {
       \ 'finished': v:false,
       \ }
 let g:defx_lint#linters = {}
+let g:defx_lint#linter_args = {}
 
 runtime! autoload/defx_lint/linters/*.vim
 
