@@ -42,3 +42,11 @@ function! defx_lint#utils#find_extension(extension) abort
 
   return glob(printf('**/*.%s', a:extension), v:false, v:true)
 endfunction
+
+function! defx_lint#utils#debug(msg) abort
+  if !get(g:, 'defx_lint#debug', v:false)
+    return
+  endif
+
+  return defx_lint#utils#echo_line(a:msg)
+endfunction

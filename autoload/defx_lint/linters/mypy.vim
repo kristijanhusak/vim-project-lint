@@ -4,7 +4,7 @@ function! s:mypy.New() abort
   let l:instance = copy(self)
   let l:instance.name = 'mypy'
   let l:instance.cmd = ''
-  let l:instance.cmd_args = get(g:, 'defx_lint#linter_args.mypy', '')
+  let l:instance.cmd_args = get(g:defx_lint#linter_args, 'mypy', '')
   let l:instance.stream = 'stdout'
   let l:instance.filetype = ['python']
   return l:instance
@@ -46,7 +46,7 @@ function! s:mypy.FileCmd(file) abort
     return ''
   endif
 
-  return printf('%s %s', self.cmd, a:file)
+  return printf('%s %s %s', self.cmd, self.cmd_args, a:file)
 endfunction
 
 function! s:mypy.Parse(item) abort

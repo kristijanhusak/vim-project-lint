@@ -7,6 +7,7 @@ function! defx_lint#run() abort
     if l:linter.Detect()
       call defx_lint#utils#set_statusline(printf('Linting project with %s...', l:linter.name))
       let g:defx_lint#status.running = v:true
+      call defx_lint#utils#debug(printf('Running command %s for linter %s', l:linter.Cmd(), l:linter.name))
       call defx_lint#job#start(l:linter.Cmd(), {
             \ 'on_stdout': function('s:on_stdout', [l:linter]),
             \ 'on_stderr': function('s:on_stdout', [l:linter]),

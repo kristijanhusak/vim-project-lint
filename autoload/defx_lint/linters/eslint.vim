@@ -4,7 +4,7 @@ function! s:eslint.New() abort
   let l:instance = copy(self)
   let l:instance.name = 'eslint'
   let l:instance.cmd = ''
-  let l:instance.cmd_args = get(g:, 'defx_lint#linter_args.eslint', '')
+  let l:instance.cmd_args = get(g:defx_lint#linter_args, 'eslint', '')
   let l:instance.stream = 'stdout'
   let l:instance.filetype = ['javascript', 'javascript.jsx']
   return l:instance
@@ -47,7 +47,7 @@ function! s:eslint.FileCmd(file) abort
     return ''
   endif
 
-  return printf('%s --format=unix %s', self.cmd, a:file)
+  return printf('%s --format=unix %s %s', self.cmd, self.cmd_args, a:file)
 endfunction
 
 function! s:eslint.Parse(item) abort

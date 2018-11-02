@@ -4,7 +4,7 @@ function! s:govet.New() abort
   let l:instance = copy(self)
   let l:instance.name = 'govet'
   let l:instance.cmd = ''
-  let l:instance.cmd_args = get(g:, 'defx_lint#linter_args.govet', '')
+  let l:instance.cmd_args = get(g:defx_lint#linter_args, 'govet', '')
   let l:instance.stream = 'stderr'
   let l:instance.filetype = ['go']
   return l:instance
@@ -40,7 +40,7 @@ function! s:govet.FileCmd(file) abort
     return ''
   endif
 
-  return printf('%s %s', self.cmd, a:file)
+  return printf('%s %s %s', self.cmd, self.cmd_args, a:file)
 endfunction
 
 function! s:govet.Parse(item) abort
