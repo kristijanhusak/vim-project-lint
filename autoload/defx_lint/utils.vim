@@ -5,11 +5,11 @@ endfunction
 
 let s:statusline = ''
 
-function! defx_lint#utils#get_statusline()
+function! defx_lint#utils#get_statusline() abort
   return s:statusline
 endfunction
 
-function! defx_lint#utils#set_statusline(text)
+function! defx_lint#utils#set_statusline(text) abort
   let s:statusline = a:text
 endfunction
 

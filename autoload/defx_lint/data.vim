@@ -20,7 +20,7 @@ function! s:data.get() abort
   return self.paths
 endfunction
 
-function! s:data.check_cache()
+function! s:data.check_cache() abort
   let l:filename = self.cache_filename()
   if filereadable(l:filename)
     let self.cache = json_decode(readfile(l:filename))

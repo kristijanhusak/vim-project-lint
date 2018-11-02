@@ -52,10 +52,6 @@ function! s:on_stdout(linter, id, message, event) abort
 endfunction
 
 function! s:on_file_stdout(linter, file, id, message, event) dict
-  echom a:event
-  echom a:message[0]
-  echom a:file
-  echom '-----'
   if !has_key(self, 'is_file_valid')
     let self.is_file_valid = v:true
   endif
@@ -105,14 +101,14 @@ function! s:redraw() abort
   endif
 endfunction
 
-function! s:job_finished()
+function! s:job_finished() abort
   call g:defx_lint#status.set_finished()
   call g:defx_lint#data.use_fresh_data()
   call s:redraw()
   return g:defx_lint#data.cache_to_file()
 endfunction
 
-function! s:run_job(cmd, linter, callback, ...)
+function! s:run_job(cmd, linter, callback, ...) abort
   return defx_lint#job#start(a:cmd, {
         \ 'on_stdout': function(a:callback, [a:linter] + a:000),
         \ 'on_stderr': function(a:callback, [a:linter] + a:000),
