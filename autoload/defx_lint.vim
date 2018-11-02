@@ -2,6 +2,14 @@ function! defx_lint#run() abort
   if g:defx_lint#status.running || g:defx_lint#status.finished
     return
   endif
+
+  let l:cache_file = defx_lint#cache#read_file()
+
+  if !empty(l:cache_file)
+    let g:defx_lint#cache = l:cache_file
+    call defx_lint#redraw()
+  endif
+
   for l:linter_name in keys(g:defx_lint#linters)
     let l:linter = g:defx_lint#linters[l:linter_name]
     if l:linter.Detect()
@@ -34,11 +42,7 @@ endfunction
 
 function! s:on_stdout(linter, id, message, event) abort
   if a:event ==? 'exit'
-    let g:defx_lint#status.running = v:false
-    let g:defx_lint#status.finished = v:true
-    call defx_lint#utils#set_statusline('')
-    call defx_lint#redraw()
-    return
+    return s:job_finished()
   endif
 
   if a:event !=? a:linter.stream
@@ -63,10 +67,7 @@ function! s:on_file_stdout(linter, file, id, message, event) dict
     if self.is_file_valid
       call defx_lint#cache#set(a:file, v:false)
     endif
-    let g:defx_lint#status.running = v:false
-    call defx_lint#utils#set_statusline('')
-    call defx_lint#redraw()
-    return
+    return s:job_finished()
   endif
 
   if a:event !=? a:linter.stream
@@ -106,4 +107,12 @@ function! defx_lint#redraw() abort
     call defx#_do_action('redraw', [])
     silent! exe 'wincmd p'
   endif
+endfunction
+
+function! s:job_finished()
+  let g:defx_lint#status.running = v:false
+  let g:defx_lint#status.finished = v:true
+  call defx_lint#utils#set_statusline('')
+  call defx_lint#cache#save_to_file()
+  call defx_lint#redraw()
 endfunction

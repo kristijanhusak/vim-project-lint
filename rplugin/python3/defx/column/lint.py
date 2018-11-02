@@ -20,8 +20,7 @@ class Column(Base):
 
     def get(self, context: Context, candidate: dict) -> str:
         default = self.format('')
-        status = self.vim.vars['defx_lint#status']
-        if status['running'] or candidate.get('is_root', False):
+        if candidate.get('is_root', False):
             return default
 
         cache = self.vim.vars['defx_lint#cache']
