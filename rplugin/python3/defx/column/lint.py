@@ -23,13 +23,13 @@ class Column(Base):
         if candidate.get('is_root', False):
             return default
 
-        cache = self.vim.vars['defx_lint#cache']
-        if not cache:
+        data = self.vim.call('defx_lint#get_data')
+        if not data:
             return default
 
         path = str(candidate['action__path'])
-        if path in cache:
-            return self.format(self.icon if cache[path] else '')
+        if path in data:
+            return self.format(self.icon if data[path] else '')
 
         return default
 

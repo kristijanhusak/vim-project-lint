@@ -1,50 +1,41 @@
 let s:govet = {}
 
-function! s:govet.New() abort
+function! s:govet.new() abort
   let l:instance = copy(self)
   let l:instance.name = 'govet'
-  let l:instance.cmd = ''
+  let l:instance.cmd = l:instance.executable()
   let l:instance.cmd_args = get(g:defx_lint#linter_args, 'govet', '')
   let l:instance.stream = 'stderr'
   let l:instance.filetype = ['go']
   return l:instance
 endfunction
 
-function! s:govet.Detect() abort
-  return len(defx_lint#utils#find_extension('go')) > 0 && self.Executable()
+function! s:govet.detect() abort
+  return !empty(self.cmd) && len(defx_lint#utils#find_extension('go')) > 0 && self.executable()
 endfunction
 
-function! s:govet.DetectForFile() abort
-  return index(self.filetype, &filetype) > -1
+function! s:govet.detect_for_file() abort
+  return !empty(self.cmd) && index(self.filetype, &filetype) > -1
 endfunction
 
-function! s:govet.Executable() abort
+function! s:govet.executable() abort
   if executable('go')
-    let self.cmd = 'go vet'
-    return v:true
+    return 'go vet'
   endif
 
-  return v:false
+  return ''
 endfunction
 
-function! s:govet.Cmd() abort
-  if self.cmd ==? ''
-    return ''
-  endif
-
+function! s:govet.command() abort
   return printf('%s %s .', self.cmd, self.cmd_args)
 endfunction
 
-function! s:govet.FileCmd(file) abort
-  if self.cmd ==? ''
-    return ''
-  endif
-
+function! s:govet.file_command(file) abort
   return printf('%s %s %s', self.cmd, self.cmd_args, a:file)
 endfunction
 
-function! s:govet.Parse(item) abort
+function! s:govet.parse(item) abort
   return defx_lint#utils#parse_unix(a:item, v:true)
 endfunction
 
-call defx_lint#add_linter(s:govet.New())
+call defx_lint#add_linter(s:govet.new())

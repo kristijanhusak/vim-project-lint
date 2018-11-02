@@ -1,41 +1,33 @@
 function! defx_lint#run() abort
-  if g:defx_lint#status.running || g:defx_lint#status.finished
+  if !g:defx_lint#status.should_lint_project()
     return
   endif
 
-  let l:cache_file = defx_lint#cache#read_file()
+  let l:has_cache = g:defx_lint#data.check_cache()
 
-  if !empty(l:cache_file)
-    let g:defx_lint#cache = l:cache_file
-    call defx_lint#redraw()
+  if l:has_cache
+    call s:redraw()
   endif
 
   for l:linter_name in keys(g:defx_lint#linters)
     let l:linter = g:defx_lint#linters[l:linter_name]
-    if l:linter.Detect()
-      call defx_lint#utils#set_statusline(printf('Linting project with %s...', l:linter.name))
-      let g:defx_lint#status.running = v:true
-      call defx_lint#utils#debug(printf('Running command %s for linter %s', l:linter.Cmd(), l:linter.name))
-      call defx_lint#job#start(l:linter.Cmd(), {
-            \ 'on_stdout': function('s:on_stdout', [l:linter]),
-            \ 'on_stderr': function('s:on_stdout', [l:linter]),
-            \ 'on_exit': function('s:on_stdout', [l:linter]),
-            \ })
+    if l:linter.detect()
+      call g:defx_lint#status.set_running(l:linter)
+      call s:run_job(l:linter.command(), l:linter, 's:on_stdout')
     endif
   endfor
 endfunction
 
 function! defx_lint#run_file(file) abort
+  if g:defx_lint#status.is_already_linting_file(a:file)
+    return
+  endif
+
   for l:linter_name in keys(g:defx_lint#linters)
     let l:linter = g:defx_lint#linters[l:linter_name]
-    if l:linter.DetectForFile()
-      call defx_lint#utils#set_statusline(printf('Linting file with %s...', l:linter.name))
-      let g:defx_lint#status.running = v:true
-      call defx_lint#job#start(l:linter.FileCmd(a:file), {
-            \ 'on_stdout': function('s:on_file_stdout', [l:linter, a:file]),
-            \ 'on_stderr': function('s:on_file_stdout', [l:linter, a:file]),
-            \ 'on_exit': function('s:on_file_stdout', [l:linter, a:file]),
-            \ })
+    if l:linter.detect_for_file()
+      call g:defx_lint#status.set_running_file(l:linter, a:file)
+      call s:run_job(l:linter.file_command(a:file), l:linter, 's:on_file_stdout', a:file)
     endif
   endfor
 endfunction
@@ -50,22 +42,26 @@ function! s:on_stdout(linter, id, message, event) abort
   endif
 
   for l:msg in a:message
-    let l:item = a:linter.Parse(l:msg)
+    let l:item = a:linter.parse(l:msg)
     if l:item ==? ''
       continue
     endif
 
-    call defx_lint#cache#set(l:item, v:true)
+    call g:defx_lint#data.add(l:item)
   endfor
 endfunction
 
 function! s:on_file_stdout(linter, file, id, message, event) dict
+  echom a:event
+  echom a:message[0]
+  echom a:file
+  echom '-----'
   if !has_key(self, 'is_file_valid')
     let self.is_file_valid = v:true
   endif
   if a:event ==? 'exit'
     if self.is_file_valid
-      call defx_lint#cache#set(a:file, v:false)
+      call g:defx_lint#data.remove(a:file)
     endif
     return s:job_finished()
   endif
@@ -75,7 +71,7 @@ function! s:on_file_stdout(linter, file, id, message, event) dict
   endif
 
   for l:msg in a:message
-    let l:item = a:linter.Parse(l:msg)
+    let l:item = a:linter.parse(l:msg)
     if l:item ==? ''
       continue
     endif
@@ -84,7 +80,7 @@ function! s:on_file_stdout(linter, file, id, message, event) dict
       let self.is_file_valid = v:false
     endif
 
-    call defx_lint#cache#set(l:item, v:true)
+    call g:defx_lint#data.add(l:item)
   endfor
 endfunction
 
@@ -94,7 +90,7 @@ function! defx_lint#add_linter(linter) abort
   endif
 endfunction
 
-function! defx_lint#redraw() abort
+function! s:redraw() abort
   if &filetype ==? 'defx'
     return defx#_do_action('redraw', [])
   endif
@@ -110,9 +106,16 @@ function! defx_lint#redraw() abort
 endfunction
 
 function! s:job_finished()
-  let g:defx_lint#status.running = v:false
-  let g:defx_lint#status.finished = v:true
-  call defx_lint#utils#set_statusline('')
-  call defx_lint#cache#save_to_file()
-  call defx_lint#redraw()
+  call g:defx_lint#status.set_finished()
+  call g:defx_lint#data.use_fresh_data()
+  call s:redraw()
+  return g:defx_lint#data.cache_to_file()
+endfunction
+
+function! s:run_job(cmd, linter, callback, ...)
+  return defx_lint#job#start(a:cmd, {
+        \ 'on_stdout': function(a:callback, [a:linter] + a:000),
+        \ 'on_stderr': function(a:callback, [a:linter] + a:000),
+        \ 'on_exit': function(a:callback, [a:linter] + a:000),
+        \ })
 endfunction
