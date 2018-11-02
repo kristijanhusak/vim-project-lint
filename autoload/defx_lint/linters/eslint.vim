@@ -1,21 +1,9 @@
-let s:eslint = {}
-
-function! s:eslint.new() abort
-  let l:instance = copy(self)
-  let l:instance.name = 'eslint'
-  let l:instance.cmd = l:instance.executable()
-  let l:instance.cmd_args = get(g:defx_lint#linter_args, 'eslint', '')
-  let l:instance.stream = 'stdout'
-  let l:instance.filetype = ['javascript', 'javascript.jsx']
-  return l:instance
-endfunction
+let s:eslint = copy(defx_lint#linters#base#get())
+let s:eslint.name = 'eslint'
+let s:eslint.filetype = ['javascript', 'javascript.jsx']
 
 function! s:eslint.detect() abort
   return !empty(self.cmd) && filereadable(printf('%s/package.json', getcwd()))
-endfunction
-
-function! s:eslint.detect_for_file() abort
-  return !empty(self.cmd) && index(self.filetype, &filetype) > -1
 endfunction
 
 function! s:eslint.executable() abort
@@ -38,10 +26,6 @@ endfunction
 
 function! s:eslint.file_command(file) abort
   return printf('%s --format=unix %s %s', self.cmd, self.cmd_args, a:file)
-endfunction
-
-function! s:eslint.parse(item) abort
-  return defx_lint#utils#parse_unix(a:item)
 endfunction
 
 call defx_lint#add_linter(s:eslint.new())

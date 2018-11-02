@@ -13,8 +13,7 @@ function! defx_lint#utils#set_statusline(text)
   let s:statusline = a:text
 endfunction
 
-function! defx_lint#utils#parse_unix(item, ...) abort
-  let l:prepend_cwd = a:0 > 0
+function! defx_lint#utils#parse_unix(item) abort
   if matchstr(a:item, ':') ==? ''
     return ''
   endif
@@ -24,7 +23,7 @@ function! defx_lint#utils#parse_unix(item, ...) abort
     return ''
   endif
 
-  if !l:prepend_cwd
+  if stridx(l:items[0], getcwd()) > -1
     return l:items[0]
   endif
 
