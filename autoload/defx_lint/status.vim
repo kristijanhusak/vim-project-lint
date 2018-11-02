@@ -48,7 +48,7 @@ function! s:status.should_lint_project() abort
 endfunction
 
 function! s:status.is_already_linting_file(file) abort
-  return self.running && self.file ==? a:file
+  return self.running && (empty(self.file) || self.file ==? a:file)
 endfunction
 
 function! defx_lint#status#new()
