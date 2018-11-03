@@ -1,0 +1,16 @@
+Execute(Queue):
+  let g:defx_lint_test_queue = defx_lint#queue#new()
+Then:
+  AssertEqual 1, g:defx_lint_test_queue.is_empty()
+
+Execute(Add to Queue):
+  call g:defx_lint_test_queue.add(1, { 'linter': { 'name': 'vim' } })
+Then:
+  AssertEqual 0, g:defx_lint_test_queue.is_empty()
+  AssertEqual ['vim'], g:defx_lint_test_queue.get_running_linters()
+
+Execute(Remove from Queue):
+  call g:defx_lint_test_queue.remove(1)
+Then:
+  AssertEqual 1, g:defx_lint_test_queue.is_empty()
+  AssertEqual [], g:defx_lint_test_queue.get_running_linters()
