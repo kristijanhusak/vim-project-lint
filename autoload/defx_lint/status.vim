@@ -10,7 +10,7 @@ endfunction
 function! s:status.set_running(linter) abort
   let self.running = v:true
   call defx_lint#utils#debug(printf(
-        \ 'Running command "%s" for linter "%s"',
+        \ 'Running command "%s" for linter "%s".',
         \ a:linter.command(),
         \ a:linter.name
         \ ))
@@ -20,7 +20,7 @@ function! s:status.set_running_file(linter, file) abort
   let self.running = v:true
 
   call defx_lint#utils#debug(printf(
-        \ 'Running command "%s" for linter "%s"',
+        \ 'Running command "%s" for linter "%s".',
         \ a:linter.file_command(a:file),
         \ a:linter.name
         \ ))
@@ -29,7 +29,7 @@ endfunction
 function! s:status.set_finished() abort
   let self.running = v:false
   let self.finished = v:true
-  call defx_lint#utils#debug('Finished running linter')
+  call defx_lint#utils#debug('Finished running linter.')
 endfunction
 
 function! s:status.should_lint_project() abort

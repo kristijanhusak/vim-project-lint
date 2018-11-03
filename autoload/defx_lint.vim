@@ -89,7 +89,8 @@ endfunction
 
 function! s:redraw() abort
   if &filetype ==? 'defx'
-    return defx#_do_action('redraw', [])
+    silent! exe "call defx#_do_action('redraw', [])"
+    return
   endif
 
   let l:defx_winnr = bufwinnr('defx')
@@ -97,7 +98,7 @@ function! s:redraw() abort
 
   if l:defx_winnr > 0
     silent! exe printf('%wincmd w')
-    call defx#_do_action('redraw', [])
+    silent! exe "call defx#_do_action('redraw', [])"
     silent! exe 'wincmd p'
   endif
 endfunction
