@@ -3,9 +3,12 @@ if exists('g:loaded_project_lint')
 endif
 let g:loaded_project_lint = v:true
 
+let g:project_lint#icon = '✗'
+let g:project_lint#icon_color = 'guifg=#fb4934 ctermfg=167'
 let g:project_lint#status = project_lint#status#new()
 let g:project_lint#data = project_lint#data#new()
 let g:project_lint#queue = project_lint#queue#new()
+let g:project_lint#callbacks = get(g:, 'project_lint#callbacks', [])
 let g:project_lint#linters = {}
 let g:project_lint#exclude_linters = get(g:, 'project_lint#exclude_linters', [])
 let g:project_lint#linter_args = get(g:, 'project_lint#linter_args', {})
@@ -21,8 +24,24 @@ function! project_lint#get_data()
   return g:project_lint#data.get()
 endfunction
 
+function! project_lint#register_file_explorer_and_run() abort
+  if !g:project_lint#status.has_valid_file_explorer()
+    return
+  endif
+
+  if g:project_lint#status.has_defx()
+    call project_lint#file_explorers#defx#register()
+  endif
+
+  if g:project_lint#status.has_nerdtree()
+    call project_lint#file_explorers#nerdtree#register()
+  endif
+
+  return project_lint#run()
+endfunction
+
 augroup project_lint
-  autocmd VimEnter * call project_lint#run()
+  autocmd!
+  autocmd VimEnter * call project_lint#register_file_explorer_and_run()
   autocmd BufWritePost * call project_lint#run_file(expand('<afile>:p'))
-  autocmd BufEnter * if &filetype ==? 'defx' | call defx#_do_action('redraw', []) | endif
 augroup END

@@ -6,7 +6,7 @@ function! project_lint#run() abort
   let l:has_cache = g:project_lint#data.check_cache()
 
   if l:has_cache
-    call s:redraw()
+    call s:trigger_callbacks()
   endif
 
   for l:linter_name in keys(g:project_lint#linters)
@@ -60,7 +60,7 @@ function! s:on_file_stdout(linter, file, id, message, event) dict
     if self.is_file_valid
       call g:project_lint#data.remove(a:linter, a:file)
     endif
-    return s:job_finished(a:id, v:true)
+    return s:job_finished(a:id, a:file)
   endif
 
   if a:event !=? a:linter.stream
@@ -87,20 +87,10 @@ function! project_lint#add_linter(linter) abort
   endif
 endfunction
 
-function! s:redraw() abort
-  if &filetype ==? 'defx'
-    silent! exe "call defx#_do_action('redraw', [])"
-    return
-  endif
-
-  let l:defx_winnr = bufwinnr('defx')
-  let l:is_defx_opened = bufwinnr('defx') > 0
-
-  if l:defx_winnr > 0
-    silent! exe printf('%wincmd w')
-    silent! exe "call defx#_do_action('redraw', [])"
-    silent! exe 'wincmd p'
-  endif
+function! s:trigger_callbacks(...) abort
+  for l:callback in g:project_lint#callbacks
+    call call(l:callback, a:000)
+  endfor
 endfunction
 
 function! s:job_finished(job_id, ...) abort
@@ -112,7 +102,7 @@ function! s:job_finished(job_id, ...) abort
 
   call g:project_lint#status.set_finished()
   call g:project_lint#data.use_fresh_data()
-  call s:redraw()
+  call s:trigger_callbacks()
   return g:project_lint#data.cache_to_file()
 endfunction
 

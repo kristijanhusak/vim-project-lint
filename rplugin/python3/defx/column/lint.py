@@ -15,8 +15,8 @@ class Column(Base):
         super().__init__(vim)
         self.name = 'lint'
         self.column_length = 2
-        self.icon = '✗'
-        self.color = 'guifg=#fb4934 ctermfg=167'
+        self.icon = self.vim.vars['project_lint#icon']
+        self.color = self.vim.vars['project_lint#icon_color']
 
     def get(self, context: Context, candidate: dict) -> str:
         default = self.format('')

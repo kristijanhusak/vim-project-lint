@@ -33,7 +33,19 @@ function! s:status.set_finished() abort
 endfunction
 
 function! s:status.should_lint_project() abort
-  return !self.running && !self.finished
+  return self.has_valid_file_explorer() && !self.running && !self.finished
+endfunction
+
+function! s:status.has_valid_file_explorer() abort
+  return  self.has_defx() || self.has_nerdtree()
+endfunction
+
+function! s:status.has_defx() abort
+  return exists('g:loaded_defx')
+endfunction
+
+function! s:status.has_nerdtree() abort
+  return exists('g:loaded_nerd_tree')
 endfunction
 
 function! project_lint#status#new() abort
