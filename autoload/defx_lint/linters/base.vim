@@ -8,7 +8,8 @@ function! s:base.new() abort
   let l:instance = copy(self)
   let l:instance.name = get(l:instance, 'name', '')
   let l:instance.cmd = l:instance.executable()
-  let l:instance.cmd_args = get(g:defx_lint#linter_args, l:instance.name, '')
+  let l:cmd_args = get(self, 'cmd_args', '')
+  let l:instance.cmd_args = get(g:defx_lint#linter_args, l:instance.name, l:cmd_args)
   let l:instance.stream = get(l:instance, 'stream', 'stdout')
   let l:instance.filetype = get(l:instance, 'filetype', [])
   return l:instance

@@ -29,7 +29,7 @@ class Column(Base):
 
         path = str(candidate['action__path'])
         if path in data:
-            return self.format(self.icon if data[path] else '')
+            return self.format(self.icon)
 
         return default
 

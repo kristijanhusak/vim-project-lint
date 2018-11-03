@@ -5,7 +5,9 @@ let g:loaded_defx_lint = v:true
 
 let g:defx_lint#status = defx_lint#status#new()
 let g:defx_lint#data = defx_lint#data#new()
+let g:defx_lint#queue = defx_lint#queue#new()
 let g:defx_lint#linters = {}
+let g:defx_lint#exclude_linters = get(g:, 'defx_lint#exclude_linters', [])
 let g:defx_lint#linter_args = get(g:, 'defx_lint#linter_args', {})
 let g:defx_lint#debug = get(g:, 'defx_lint#debug', v:false)
 

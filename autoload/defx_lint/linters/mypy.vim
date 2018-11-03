@@ -1,14 +1,19 @@
 let s:mypy = copy(defx_lint#linters#base#get())
 let s:mypy.name = 'mypy'
 let s:mypy.filetype = ['python']
-let s:mypy.files = []
+let s:mypy.dir = ''
 
 function! s:mypy.detect() abort
   if empty(self.cmd)
     return v:false
   endif
-  let self.files = defx_lint#utils#find_extension('py')
-  return len(self.files) > 0
+  let l:file = defx_lint#utils#find_extension('py')
+  if empty(l:file)
+    return v:false
+  endif
+
+  let self.dir = fnamemodify(l:file, ':p:h')
+  return v:true
 endfunction
 
 function! s:mypy.executable() abort
@@ -21,8 +26,8 @@ endfunction
 
 function! s:mypy.command() abort
   let l:target = '.'
-  if len(self.files) > 0
-    let l:target = fnamemodify(self.files[0], ':p:h')
+  if !empty(self.dir)
+    let l:target = self.dir
   endif
 
   return printf('%s %s %s', self.cmd, self.cmd_args, l:target)

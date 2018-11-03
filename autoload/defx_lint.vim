@@ -16,25 +16,26 @@ function! defx_lint#run() abort
       call s:run_job(l:linter.command(), l:linter, 's:on_stdout')
     endif
   endfor
+  call defx_lint#utils#set_statusline()
 endfunction
 
 function! defx_lint#run_file(file) abort
-  if g:defx_lint#status.is_already_linting_file(a:file)
-    return
-  endif
-
   for l:linter_name in keys(g:defx_lint#linters)
     let l:linter = g:defx_lint#linters[l:linter_name]
     if l:linter.detect_for_file()
+      if g:defx_lint#queue.already_linting_file(l:linter, a:file)
+        continue
+      endif
       call g:defx_lint#status.set_running_file(l:linter, a:file)
       call s:run_job(l:linter.file_command(a:file), l:linter, 's:on_file_stdout', a:file)
     endif
   endfor
+  call defx_lint#utils#set_statusline(a:file)
 endfunction
 
 function! s:on_stdout(linter, id, message, event) abort
   if a:event ==? 'exit'
-    return s:job_finished()
+    return s:job_finished(a:id)
   endif
 
   if a:event !=? a:linter.stream
@@ -43,11 +44,11 @@ function! s:on_stdout(linter, id, message, event) abort
 
   for l:msg in a:message
     let l:item = a:linter.parse(l:msg)
-    if l:item ==? ''
+    if empty(l:item)
       continue
     endif
 
-    call g:defx_lint#data.add(l:item)
+    call g:defx_lint#data.add(a:linter, l:item)
   endfor
 endfunction
 
@@ -57,9 +58,9 @@ function! s:on_file_stdout(linter, file, id, message, event) dict
   endif
   if a:event ==? 'exit'
     if self.is_file_valid
-      call g:defx_lint#data.remove(a:file)
+      call g:defx_lint#data.remove(a:linter, a:file)
     endif
-    return s:job_finished()
+    return s:job_finished(a:id, v:true)
   endif
 
   if a:event !=? a:linter.stream
@@ -68,7 +69,7 @@ function! s:on_file_stdout(linter, file, id, message, event) dict
 
   for l:msg in a:message
     let l:item = a:linter.parse(l:msg)
-    if l:item ==? ''
+    if empty(l:item)
       continue
     endif
 
@@ -76,7 +77,7 @@ function! s:on_file_stdout(linter, file, id, message, event) dict
       let self.is_file_valid = v:false
     endif
 
-    call g:defx_lint#data.add(l:item)
+    call g:defx_lint#data.add(a:linter, l:item)
   endfor
 endfunction
 
@@ -101,7 +102,13 @@ function! s:redraw() abort
   endif
 endfunction
 
-function! s:job_finished() abort
+function! s:job_finished(job_id, ...) abort
+  call g:defx_lint#queue.remove(a:job_id)
+  call defx_lint#utils#set_statusline(a:0 > 0)
+  if !g:defx_lint#queue.is_empty()
+    return
+  endif
+
   call g:defx_lint#status.set_finished()
   call g:defx_lint#data.use_fresh_data()
   call s:redraw()
@@ -109,9 +116,14 @@ function! s:job_finished() abort
 endfunction
 
 function! s:run_job(cmd, linter, callback, ...) abort
-  return defx_lint#job#start(a:cmd, {
+  let l:job_id = defx_lint#job#start(a:cmd, {
         \ 'on_stdout': function(a:callback, [a:linter] + a:000),
         \ 'on_stderr': function(a:callback, [a:linter] + a:000),
         \ 'on_exit': function(a:callback, [a:linter] + a:000),
+        \ })
+
+  call g:defx_lint#queue.add(l:job_id, {
+        \ 'linter': a:linter,
+        \ 'file': a:0 > 0 ? a:1 : ''
         \ })
 endfunction
