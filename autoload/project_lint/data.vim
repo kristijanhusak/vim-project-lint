@@ -1,6 +1,6 @@
 let s:data = {}
 
-function! defx_lint#data#new() abort
+function! project_lint#data#new() abort
   return s:data.new()
 endfunction
 
@@ -99,7 +99,7 @@ function! s:data.remove_single(linter, file) abort
 endfunction
 
 function! s:data.cache_filename() abort
-  let l:fname = printf('~/.cache/defx-lint/%s.json',
+  let l:fname = printf('~/.cache/vim-project-lint/%s.json',
         \  tolower(substitute(getcwd(), '/', '-', 'g'))[1:])
   return fnamemodify(l:fname, ':p')
 endfunction
@@ -116,7 +116,7 @@ function! s:data.cache_to_file() abort
     return writefile([json_encode(self.paths)], l:filename)
   endif
 
-  let l:cache_dir = fnamemodify('~/.cache/defx-lint', ':p')
+  let l:cache_dir = fnamemodify('~/.cache/vim-project-lint', ':p')
   if !isdirectory(l:cache_dir)
     call mkdir(l:cache_dir, 'p')
   endif

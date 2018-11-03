@@ -23,7 +23,7 @@ class Column(Base):
         if candidate.get('is_root', False):
             return default
 
-        data = self.vim.call('defx_lint#get_data')
+        data = self.vim.call('project_lint#get_data')
         if not data:
             return default
 

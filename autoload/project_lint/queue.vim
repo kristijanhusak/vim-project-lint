@@ -1,6 +1,6 @@
 let s:queue = {}
 
-function defx_lint#queue#new() abort
+function project_lint#queue#new() abort
   return s:queue.new()
 endfunction
 

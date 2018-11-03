@@ -1,4 +1,4 @@
-let s:flake8 = copy(defx_lint#linters#base#get())
+let s:flake8 = copy(project_lint#linters#base#get())
 let s:flake8.name = 'flake8'
 let s:flake8.filetype = ['python']
 let s:flake8.dir = ''
@@ -7,7 +7,7 @@ function! s:flake8.detect() abort
   if empty(self.cmd)
     return v:false
   endif
-  let l:file = defx_lint#utils#find_extension('py')
+  let l:file = project_lint#utils#find_extension('py')
   if empty(l:file)
     return v:false
   endif
@@ -24,4 +24,4 @@ function! s:flake8.executable() abort
   return ''
 endfunction
 
-call defx_lint#add_linter(s:flake8.new())
+call project_lint#add_linter(s:flake8.new())

@@ -1,4 +1,4 @@
-let s:eslint = copy(defx_lint#linters#base#get())
+let s:eslint = copy(project_lint#linters#base#get())
 let s:eslint.name = 'eslint'
 let s:eslint.filetype = ['javascript', 'javascript.jsx']
 
@@ -28,4 +28,4 @@ function! s:eslint.file_command(file) abort
   return printf('%s --format=unix %s %s', self.cmd, self.cmd_args, a:file)
 endfunction
 
-call defx_lint#add_linter(s:eslint.new())
+call project_lint#add_linter(s:eslint.new())
