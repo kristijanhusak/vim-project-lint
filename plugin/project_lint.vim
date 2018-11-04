@@ -38,6 +38,10 @@ function! project_lint#register_file_explorer_and_run() abort
     call project_lint#file_explorers#nerdtree#register()
   endif
 
+  if g:project_lint#status.has_vimfiler()
+    call project_lint#file_explorers#vimfiler#register()
+  endif
+
   return project_lint#run()
 endfunction
 

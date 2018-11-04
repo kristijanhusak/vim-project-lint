@@ -37,7 +37,7 @@ function! s:status.should_lint_project() abort
 endfunction
 
 function! s:status.has_valid_file_explorer() abort
-  return  self.has_defx() || self.has_nerdtree()
+  return  self.has_defx() || self.has_nerdtree() || self.has_vimfiler()
 endfunction
 
 function! s:status.has_defx() abort
@@ -46,6 +46,10 @@ endfunction
 
 function! s:status.has_nerdtree() abort
   return exists('g:loaded_nerd_tree')
+endfunction
+
+function! s:status.has_vimfiler() abort
+  return exists('g:loaded_vimfiler')
 endfunction
 
 function! s:status.should_lint_file(file)
