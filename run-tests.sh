@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 
-if [ ! -d "vader.vim" ]; then
-  git clone https://github.com/junegunn/vader.vim
+if [ ! -d "vim-themis" ]; then
+  git clone https://github.com/thinca/vim-themis
 fi
 
-nvim -Nu <(cat << EOF
-filetype off
-set rtp+=vader.vim
-set rtp+=.
-filetype plugin indent on
-syntax enable
-EOF
-) +Vader! test/* && echo 'All tests passed!' || echo 'Tests failed.'
+./vim-themis/bin/themis -r --reporter spec test/

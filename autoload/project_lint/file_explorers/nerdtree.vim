@@ -1,13 +1,7 @@
-function! project_lint#file_explorers#nerdtree#register() abort
-  augroup project_lint_nerdtree
-    autocmd FileType nerdtree call s:setup_highlighting()
-  augroup END
-  call g:NERDTreePathNotifier.AddListener('init', 'project_lint#file_explorers#nerdtree#listener')
-  call g:NERDTreePathNotifier.AddListener('refresh', 'project_lint#file_explorers#nerdtree#listener')
-  call g:NERDTreePathNotifier.AddListener('refreshFlags', 'project_lint#file_explorers#nerdtree#listener')
+let s:nerdtree = {}
 
-  call add(g:project_lint#callbacks, 'project_lint#file_explorers#nerdtree#callback')
-  call s:setup_highlighting()
+function! project_lint#file_explorers#nerdtree#new() abort
+  return s:nerdtree.new()
 endfunction
 
 function! project_lint#file_explorers#nerdtree#listener(event) abort
@@ -19,19 +13,40 @@ function! project_lint#file_explorers#nerdtree#listener(event) abort
   return l:subject.flagSet.clearFlags('project_lint')
 endfunction
 
-function! project_lint#file_explorers#nerdtree#callback(...) abort
+function s:nerdtree.new() abort
+  let l:instance = copy(self)
+  call l:instance.add_listeners()
+  call l:instance.add_autocmd()
+  return l:instance
+endfunction
+
+function! s:nerdtree.add_listeners() abort
+  call g:NERDTreePathNotifier.AddListener('init', 'project_lint#file_explorers#nerdtree#listener')
+  call g:NERDTreePathNotifier.AddListener('refresh','project_lint#file_explorers#nerdtree#listener')
+  call g:NERDTreePathNotifier.AddListener('refreshFlags','project_lint#file_explorers#nerdtree#listener')
+endfunction
+
+function! s:nerdtree.add_autocmd() abort
+  augroup project_lint_nerdtree
+    autocmd FileType nerdtree call s:add_highlighting()
+  augroup END
+
+  call s:add_highlighting()
+endfunction
+
+function! s:nerdtree.callback(...) abort
   if !g:NERDTree.IsOpen() && !exists('b:NERDTree')
     return
   endif
 
   if a:0 > 0
-    return s:refresh_file(a:1)
+    return self.refresh_file(a:1)
   endif
 
-  return s:refresh_tree()
+  return self.refresh_tree()
 endfunction
 
-function! s:refresh_file(file) abort
+function! s:nerdtree.refresh_file(file) abort
   if !g:NERDTree.IsOpen()
     return
   endif
@@ -57,7 +72,7 @@ function! s:refresh_file(file) abort
   exec l:winnr . 'wincmd w'
 endfunction
 
-function! s:refresh_tree() abort
+function! s:nerdtree.refresh_tree() abort
   if exists('b:NERDTree')
     call b:NERDTree.root.refreshFlags()
     return NERDTreeRender()
@@ -79,7 +94,7 @@ function! s:refresh_tree() abort
   exec l:winnr . 'wincmd w'
 endfunction
 
-function! s:setup_highlighting() abort
+function! s:add_highlighting() abort
   let l:padding = ''
   if exists('g:loaded_nerdtree_git_status')
     let l:padding = '[^\(\[\|\]\)]*\zs'

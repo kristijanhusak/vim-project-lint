@@ -1,8 +1,15 @@
-function! project_lint#file_explorers#vimfiler#register() abort
-  call add(g:project_lint#callbacks, 'project_lint#file_explorers#vimfiler#callback')
+let s:vimfiler = {}
+
+function! project_lint#file_explorers#vimfiler#new() abort
+  return s:vimfiler.new()
 endfunction
 
-function! project_lint#file_explorers#vimfiler#callback(...) abort
+function s:vimfiler.new() abort
+  let l:instance = copy(self)
+  return l:instance
+endfunction
+
+function! s:vimfiler.callback(...) abort
   if &filetype ==? 'vimfiler'
     return
   endif
