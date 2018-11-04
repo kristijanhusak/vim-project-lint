@@ -99,9 +99,9 @@ function! s:data.remove_single(linter, file) abort
 endfunction
 
 function! s:data.cache_filename() abort
-  let l:fname = printf('~/.cache/vim-project-lint/%s.json',
-        \  tolower(substitute(getcwd(), '/', '-', 'g'))[1:])
-  return fnamemodify(l:fname, ':p')
+  let l:filename = tolower(substitute(getcwd(), '/', '-', 'g'))[1:]
+  let l:filename_path = printf('%s/%s.json', g:project_lint#cache_dir, l:filename)
+  return fnamemodify(l:filename_path, ':p')
 endfunction
 
 function! s:data.use_fresh_data() abort

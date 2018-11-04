@@ -1,6 +1,6 @@
 let s:base = {}
 
-function! project_lint#linters#base#get() abort
+function! project_lint#base_linter#get() abort
   return s:base
 endfunction
 

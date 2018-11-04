@@ -1,10 +1,6 @@
-let s:eslint = copy(project_lint#linters#base#get())
+let s:eslint = copy(project_lint#base_linter#get())
 let s:eslint.name = 'eslint'
 let s:eslint.filetype = ['javascript', 'javascript.jsx']
-
-function! s:eslint.detect() abort
-  return !empty(self.cmd) && filereadable(printf('%s/package.json', getcwd()))
-endfunction
 
 function! s:eslint.executable() abort
   let l:local = printf('%s/node_modules/.bin/eslint', getcwd())
@@ -28,4 +24,4 @@ function! s:eslint.file_command(file) abort
   return printf('%s --format=unix %s %s', self.cmd, self.cmd_args, a:file)
 endfunction
 
-call project_lint#add_linter(s:eslint.new())
+call g:project_lint#linters.add(s:eslint.new())

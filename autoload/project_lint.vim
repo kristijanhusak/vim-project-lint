@@ -9,8 +9,7 @@ function! project_lint#run() abort
     call s:trigger_callbacks()
   endif
 
-  for l:linter_name in keys(g:project_lint#linters)
-    let l:linter = g:project_lint#linters[l:linter_name]
+  for l:linter in g:project_lint#linters.get()
     if l:linter.detect()
       call g:project_lint#status.set_running(l:linter)
       call s:run_job(l:linter.command(), l:linter, 's:on_stdout')
@@ -24,8 +23,7 @@ function! project_lint#run_file(file) abort
     return
   endif
 
-  for l:linter_name in keys(g:project_lint#linters)
-    let l:linter = g:project_lint#linters[l:linter_name]
+  for l:linter in g:project_lint#linters.get()
     if l:linter.detect_for_file()
       if g:project_lint#queue.already_linting_file(l:linter, a:file)
         continue
@@ -83,12 +81,6 @@ function! s:on_file_stdout(linter, file, id, message, event) dict
 
     call g:project_lint#data.add(a:linter, l:item)
   endfor
-endfunction
-
-function! project_lint#add_linter(linter) abort
-  if !has_key(g:project_lint#linters, a:linter.name)
-    let g:project_lint#linters[a:linter.name] = a:linter
-  endif
 endfunction
 
 function! s:trigger_callbacks(...) abort

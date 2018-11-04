@@ -63,6 +63,10 @@ function! project_lint#utils#find_extension(extension) abort
   return ''
 endfunction
 
+function! project_lint#utils#has_file_in_cwd(file) abort
+  return filereadable(printf('%s/%s', getcwd(), a:file))
+endfunction
+
 function! project_lint#utils#debug(msg) abort
   if !get(g:, 'project_lint#debug', v:false)
     return

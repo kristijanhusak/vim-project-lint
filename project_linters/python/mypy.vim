@@ -1,4 +1,4 @@
-let s:mypy = copy(project_lint#linters#base#get())
+let s:mypy = copy(project_lint#base_linter#get())
 let s:mypy.name = 'mypy'
 let s:mypy.filetype = ['python']
 let s:mypy.dir = ''
@@ -33,4 +33,4 @@ function! s:mypy.command() abort
   return printf('%s %s %s', self.cmd, self.cmd_args, l:target)
 endfunction
 
-call project_lint#add_linter(s:mypy.new())
+call g:project_lint#linters.add(s:mypy.new())
