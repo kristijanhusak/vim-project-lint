@@ -1,15 +1,6 @@
-function! project_lint#utils#echo_line(text) abort
-  silent! exe 'redraw'
-  echom a:text
-endfunction
-
 let s:statusline = ''
 
-function! project_lint#utils#get_statusline() abort
-  return s:statusline
-endfunction
-
-function! project_lint#utils#set_statusline() abort
+function! project_lint#utils#update_statusline() abort
   let l:running_linters = g:project_lint#queue.get_running_linters()
   if empty(l:running_linters.project) && empty(l:running_linters.files)
     let s:statusline = ''
@@ -30,6 +21,21 @@ function! project_lint#utils#set_statusline() abort
 
   let l:cache_text = g:project_lint#data.use_cache ? 'Loaded from cache. Refreshing': 'Linting'
   let s:statusline = printf('%s %s', l:cache_text, l:text)
+endfunction
+
+function! project_lint#utils#get_statusline() abort
+  return s:statusline
+endfunction
+
+function! project_lint#utils#echo_line(text) abort
+  silent! exe 'redraw'
+  echom a:text
+endfunction
+
+function! project_lint#utils#error(text) abort
+  echohl Error
+  call project_lint#utils#echo_line(a:text)
+  echohl NONE
 endfunction
 
 function! project_lint#utils#parse_unix(item) abort
@@ -75,7 +81,7 @@ function! project_lint#utils#debug(msg) abort
   return project_lint#utils#echo_line(a:msg)
 endfunction
 
-function s:find_extension(extension) abort
+function! s:find_extension(extension) abort
   if executable('rg')
     return systemlist(printf("rg --files --glob '**/*.%s'", a:extension))
   endif

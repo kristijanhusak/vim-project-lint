@@ -8,12 +8,18 @@ let g:project_lint#icon_color = get(g:, 'project_lint#icon_color', 'guifg=#fb493
 let g:project_lint#exclude_linters = get(g:, 'project_lint#exclude_linters', [])
 let g:project_lint#linter_args = get(g:, 'project_lint#linter_args', {})
 let g:project_lint#debug = get(g:, 'project_lint#debug', v:false)
-let g:project_lint#callbacks = get(g:, 'project_lint#callbacks', [])
 let g:project_lint#cache_dir = get(g:, 'project_lint#cache_dir', '~/.cache/vim-project-lint')
-let g:project_lint#status = project_lint#status#new()
+let g:project_lint#file_explorers = project_lint#file_explorers#new()
+let g:project_lint#job = project_lint#job#new()
 let g:project_lint#data = project_lint#data#new()
-let g:project_lint#queue = project_lint#queue#new()
+let g:project_lint#queue = project_lint#queue#new(g:project_lint#job, g:project_lint#data)
 let g:project_lint#linters = project_lint#linters#new()
+let g:project_lint = project_lint#new(
+      \ g:project_lint#linters,
+      \ g:project_lint#data,
+      \ g:project_lint#queue,
+      \ g:project_lint#file_explorers,
+      \ )
 
 function! project_lint#statusline()
   return project_lint#utils#get_statusline()
@@ -23,30 +29,8 @@ function! project_lint#get_data()
   return g:project_lint#data.get()
 endfunction
 
-function! project_lint#register_file_explorer_and_run() abort
-  if !g:project_lint#status.has_valid_file_explorer()
-    return
-  endif
-
-  call g:project_lint#linters.load()
-
-  if g:project_lint#status.has_defx()
-    call project_lint#file_explorers#defx#register()
-  endif
-
-  if g:project_lint#status.has_nerdtree()
-    call project_lint#file_explorers#nerdtree#register()
-  endif
-
-  if g:project_lint#status.has_vimfiler()
-    call project_lint#file_explorers#vimfiler#register()
-  endif
-
-  return project_lint#run()
-endfunction
-
 augroup project_lint
   autocmd!
-  autocmd VimEnter * call project_lint#register_file_explorer_and_run()
-  autocmd BufWritePost * call project_lint#run_file(expand('<afile>:p'))
+  autocmd VimEnter * call g:project_lint.init()
+  autocmd BufWritePost * call g:project_lint.run_file(expand('<afile>:p'))
 augroup END

@@ -1,12 +1,23 @@
-function! project_lint#file_explorers#defx#register() abort
+let s:defx = {}
+
+function! project_lint#file_explorers#defx#new() abort
+  return s:defx.new()
+endfunction
+
+function s:defx.new() abort
+  let l:instance = copy(self)
+  call l:instance.add_autocmd()
+  return l:instance
+endfunction
+
+function! s:defx.add_autocmd() abort
   augroup project_lint_defx
     autocmd!
     autocmd BufEnter * if &ft ==? 'defx' | call defx#_do_action('redraw', [[]]) | endif
   augroup END
-  call add(g:project_lint#callbacks, 'project_lint#file_explorers#defx#callback')
 endfunction
 
-function! project_lint#file_explorers#defx#callback(...) abort
+function! s:defx.callback(...) abort
   if &filetype ==? 'defx'
     silent! exe "call defx#_do_action('redraw', [])"
     return

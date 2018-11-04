@@ -252,19 +252,25 @@ function! s:job_wait(jobids, timeout) abort
 endfunction
 
 " public apis {{{
-function! project_lint#job#start(cmd, opts) abort
+let s:job = {}
+
+function project_lint#job#new() abort
+  return s:job
+endfunction
+
+function! s:job.start(cmd, opts) abort
     return s:job_start(a:cmd, a:opts)
 endfunction
 
-function! project_lint#job#stop(jobid) abort
+function! s:job.stop(jobid) abort
     call s:job_stop(a:jobid)
 endfunction
 
-function! project_lint#job#send(jobid, data) abort
+function! s:job.send(jobid, data) abort
     call s:job_send(a:jobid, a:data)
 endfunction
 
-function! project_lint#job#wait(jobids, ...) abort
+function! s:job.wait(jobids, ...) abort
     let l:timeout = get(a:000, 0, -1)
     return s:job_wait(a:jobids, l:timeout)
 endfunction
