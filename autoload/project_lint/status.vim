@@ -48,6 +48,10 @@ function! s:status.has_nerdtree() abort
   return exists('g:loaded_nerd_tree')
 endfunction
 
+function! s:status.should_lint_file(file)
+  return stridx(a:file, getcwd()) ==? 0
+endfunction
+
 function! project_lint#status#new() abort
   return s:status.new()
 endfunction

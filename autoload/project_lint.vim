@@ -20,6 +20,10 @@ function! project_lint#run() abort
 endfunction
 
 function! project_lint#run_file(file) abort
+  if !g:project_lint#status.should_lint_file(a:file)
+    return
+  endif
+
   for l:linter_name in keys(g:project_lint#linters)
     let l:linter = g:project_lint#linters[l:linter_name]
     if l:linter.detect_for_file()
@@ -30,7 +34,7 @@ function! project_lint#run_file(file) abort
       call s:run_job(l:linter.file_command(a:file), l:linter, 's:on_file_stdout', a:file)
     endif
   endfor
-  call project_lint#utils#set_statusline(a:file)
+  call project_lint#utils#set_statusline()
 endfunction
 
 function! s:on_stdout(linter, id, message, event) abort
@@ -95,14 +99,14 @@ endfunction
 
 function! s:job_finished(job_id, ...) abort
   call g:project_lint#queue.remove(a:job_id)
-  call project_lint#utils#set_statusline(a:0 > 0)
   if !g:project_lint#queue.is_empty()
     return
   endif
+  call project_lint#utils#set_statusline()
 
   call g:project_lint#status.set_finished()
   call g:project_lint#data.use_fresh_data()
-  call s:trigger_callbacks()
+  call call('s:trigger_callbacks', a:000)
   return g:project_lint#data.cache_to_file()
 endfunction
 

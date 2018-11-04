@@ -13,10 +13,10 @@ endfunction
 function! project_lint#file_explorers#nerdtree#listener(event) abort
   let l:subject = a:event.subject
   let l:path = l:subject.str()
-  call l:subject.flagSet.clearFlags('project_lint')
   if has_key(g:project_lint#data.get(), l:path)
-    call l:subject.flagSet.addFlag('project_lint', g:project_lint#icon)
+    return l:subject.flagSet.addFlag('project_lint', g:project_lint#icon)
   endif
+  return l:subject.flagSet.clearFlags('project_lint')
 endfunction
 
 function! project_lint#file_explorers#nerdtree#callback(...) abort
@@ -54,6 +54,7 @@ function! s:refresh_file(file) abort
   call NERDTreeRender()
 
   exec l:altwinnr . 'wincmd w'
+  exec l:winnr . 'wincmd w'
 endfunction
 
 function! s:refresh_tree() abort

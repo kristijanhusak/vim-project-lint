@@ -45,7 +45,7 @@ function! s:data.add(linter, file) abort
 endfunction
 
 function! s:data.remove(linter, file) abort
-  let l:should_cache_dirs = self.remove_single(a:linter, a:file)
+  call self.remove_single(a:linter, a:file)
   let l:dir = fnamemodify(a:file, ':h')
 
   if l:dir ==? getcwd()

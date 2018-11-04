@@ -9,15 +9,27 @@ function! project_lint#utils#get_statusline() abort
   return s:statusline
 endfunction
 
-function! project_lint#utils#set_statusline(...) abort
+function! project_lint#utils#set_statusline() abort
   let l:running_linters = g:project_lint#queue.get_running_linters()
-  if empty(l:running_linters)
+  if empty(l:running_linters.project) && empty(l:running_linters.files)
     let s:statusline = ''
     return v:false
   endif
 
-  let l:text = a:0 > 0 ? 'file' : 'project'
-  let s:statusline = printf('Linting %s with "%s"', l:text, join(l:running_linters, ', '))
+  let l:text = []
+
+  if len(l:running_linters.project) > 0
+    call add(l:text, printf('project with: %s', l:running_linters.project))
+  endif
+
+  if len(l:running_linters.files) > 0
+    call add(l:text, printf('file(s) with: %s', l:running_linters.files))
+  endif
+
+  let l:text = join(l:text, ', ')
+
+  let l:cache_text = g:project_lint#data.use_cache ? 'Loaded from cache. Refreshing': 'Linting'
+  let s:statusline = printf('%s %s', l:cache_text, l:text)
 endfunction
 
 function! project_lint#utils#parse_unix(item) abort

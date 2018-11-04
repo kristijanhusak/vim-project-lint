@@ -45,14 +45,17 @@ function! s:queue.already_linting_file(linter, file) abort
 endfunction
 
 function! s:queue.get_running_linters() abort
+  let l:result = { 'project': [], 'files': [] }
   if self.is_empty()
-    return []
+    return l:result
   endif
 
-  let l:result = []
-
   for [l:id, l:job] in items(self.jobs)
-    call add(l:result, l:job.linter.name)
+    if has_key(l:job, 'file') && !empty(l:job.file)
+      call add(l:result.files, l:job.linter.name)
+    else
+      call add(l:result.project, l:job.linter.name)
+    endif
   endfor
 
   return l:result

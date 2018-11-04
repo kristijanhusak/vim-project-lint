@@ -6,7 +6,7 @@ function! project_lint#file_explorers#defx#register() abort
   call add(g:project_lint#callbacks, 'project_lint#file_explorers#defx#callback')
 endfunction
 
-function! project_lint#file_explorers#defx#callback() abort
+function! project_lint#file_explorers#defx#callback(...) abort
   if &filetype ==? 'defx'
     silent! exe "call defx#_do_action('redraw', [])"
     return
