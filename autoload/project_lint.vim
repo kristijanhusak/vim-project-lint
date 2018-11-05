@@ -25,6 +25,20 @@ function! s:lint.init() abort
   return self.run()
 endfunction
 
+function! s:lint.handle_dir_change(event) abort
+  if a:event !=? 'global'
+    return
+  endif
+
+  let l:new_root = project_lint#utils#get_project_root()
+  if l:new_root ==? g:project_lint#root
+    return
+  endif
+
+  let g:project_lint#root = l:new_root
+  return self.init()
+endfunction
+
 function! s:lint.run() abort
   if self.running
     return project_lint#utils#error('Project lint already running.')
