@@ -34,11 +34,11 @@ function! s:data.add(linter, file) abort
   let l:should_cache_dirs = self.add_single(a:linter, a:file, v:false)
   let l:dir = fnamemodify(a:file, ':h')
 
-  if l:dir ==? getcwd() || !l:should_cache_dirs
+  if l:dir ==? g:project_lint#root || !l:should_cache_dirs
     return
   endif
 
-  while l:dir !=? getcwd()
+  while l:dir !=? g:project_lint#root
     call self.add_single(a:linter, l:dir, v:true)
     let l:dir = fnamemodify(l:dir, ':h')
   endwhile
@@ -48,11 +48,11 @@ function! s:data.remove(linter, file) abort
   call self.remove_single(a:linter, a:file)
   let l:dir = fnamemodify(a:file, ':h')
 
-  if l:dir ==? getcwd()
+  if l:dir ==? g:project_lint#root
     return
   endif
 
-  while l:dir !=? getcwd()
+  while l:dir !=? g:project_lint#root
     call self.remove_single(a:linter, l:dir)
     let l:dir = fnamemodify(l:dir, ':h')
   endwhile
@@ -99,7 +99,7 @@ function! s:data.remove_single(linter, file) abort
 endfunction
 
 function! s:data.cache_filename() abort
-  let l:filename = tolower(substitute(getcwd(), '/', '-', 'g'))[1:]
+  let l:filename = tolower(substitute(g:project_lint#root, '/', '-', 'g'))[1:]
   let l:filename_path = printf('%s/%s.json', g:project_lint#cache_dir, l:filename)
   return fnamemodify(l:filename_path, ':p')
 endfunction

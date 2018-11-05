@@ -75,7 +75,7 @@ function! s:lint.run_file(file) abort
 endfunction
 
 function! s:lint.should_lint_file(file) abort
-  return stridx(a:file, getcwd()) ==? 0
+  return stridx(a:file, g:project_lint#root) ==? 0
 endfunction
 
 function! s:lint.finished(...) abort

@@ -48,11 +48,11 @@ function! project_lint#utils#parse_unix(item) abort
     return ''
   endif
 
-  if stridx(l:items[0], getcwd()) > -1
+  if stridx(l:items[0], g:project_lint#root) > -1
     return l:items[0]
   endif
 
-  return printf('%s/%s', getcwd(), l:items[0])
+  return printf('%s/%s', g:project_lint#root, l:items[0])
 endfunction
 
 let s:extensions_found = {}
@@ -70,7 +70,7 @@ function! project_lint#utils#find_extension(extension) abort
 endfunction
 
 function! project_lint#utils#has_file_in_cwd(file) abort
-  return filereadable(printf('%s/%s', getcwd(), a:file))
+  return filereadable(printf('%s/%s', g:project_lint#root, a:file))
 endfunction
 
 function! project_lint#utils#debug(msg) abort
@@ -83,12 +83,59 @@ endfunction
 
 function! s:find_extension(extension) abort
   if executable('rg')
-    return systemlist(printf("rg --files --glob '**/*.%s'", a:extension))
+    return project_lint#utils#system(printf("cd %s && rg --files -t '%s'", g:project_lint#root, a:extension))
   endif
 
   if executable('ag')
-    return systemlist(printf('ag -g "^.*\.%s$"', a:extension))
+    return project_lint#utils#system(printf('cd %s && ag -g "^.*\.%s$"', g:project_lint#root, a:extension))
   endif
 
-  return glob(printf('**/*.%s', a:extension), v:false, v:true)
+  return glob(printf('%s/**/*.%s', g:project_lint#root, a:extension), v:false, v:true)
+endfunction
+
+function project_lint#utils#get_project_root() abort
+  let l:project_file = findfile('.vimprojectlint', printf('%s;', getcwd()))
+  if !empty(l:project_file)
+    let l:project_file = fnamemodify(l:project_file, ':p:h')
+  endif
+  let l:git_root = ''
+  if executable('git')
+    let l:cmd = systemlist('git rev-parse --show-toplevel')
+    if !v:shell_error
+      let l:git_root = fnamemodify(l:cmd[0], ':p:h')
+    endif
+  endif
+
+  if empty(l:project_file) && empty(l:git_root)
+    return getcwd()
+  endif
+
+  if len(l:project_file) > len(l:git_root)
+    return l:project_file
+  endif
+
+  return l:git_root
+endfunction
+
+function! project_lint#utils#system(cmd) abort
+  let l:save_shell = s:set_shell()
+  let l:cmd_output = systemlist(a:cmd)
+  call s:restore_shell(l:save_shell)
+  return l:cmd_output
+endfunction
+
+function! s:set_shell() abort
+  let l:save_shell = [&shell, &shellcmdflag, &shellredir]
+
+  if has('win32')
+    set shell=cmd.exe shellcmdflag=/c shellredir=>%s\ 2>&1
+  else
+    set shell=sh shellredir=>%s\ 2>&1
+  endif
+
+  return l:save_shell
+endfunction
+
+function! s:restore_shell(saved_shell) abort
+  let [&shell, &shellcmdflag, &shellredir] = a:saved_shell
 endfunction

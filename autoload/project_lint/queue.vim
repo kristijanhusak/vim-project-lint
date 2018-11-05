@@ -83,6 +83,7 @@ function! s:queue.run_job(cmd, linter, callback, ...) abort
         \ 'on_stdout': funcref(l:cb, [a:linter] + a:000, self),
         \ 'on_stderr': funcref(l:cb, [a:linter] + a:000, self),
         \ 'on_exit': funcref(l:cb, [a:linter] + a:000, self),
+        \ 'cwd': g:project_lint#root
         \ })
 endfunction
 

@@ -3,7 +3,7 @@ let s:eslint.name = 'eslint'
 let s:eslint.filetype = ['javascript', 'javascript.jsx']
 
 function! s:eslint.executable() abort
-  let l:local = printf('%s/node_modules/.bin/eslint', getcwd())
+  let l:local = printf('%s/node_modules/.bin/eslint', g:project_lint#root)
   let l:global = 'eslint'
   if executable(l:local)
     return l:local
