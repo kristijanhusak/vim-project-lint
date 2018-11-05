@@ -4,6 +4,7 @@
 # License: MIT license
 # ============================================================================
 
+import typing
 from defx.base.column import Base
 from defx.context import Context
 from neovim import Nvim
@@ -15,20 +16,21 @@ class Column(Base):
         super().__init__(vim)
         self.name = 'lint'
         self.column_length = 2
-        self.icon = self.vim.vars['project_lint#icon']
-        self.color = self.vim.vars['project_lint#icon_color']
+        self.icon: str = self.vim.vars['project_lint#icon']
+        self.color: str = self.vim.vars['project_lint#icon_color']
+        self.cache: typing.Dict[str, dict] = {}
 
     def get(self, context: Context, candidate: dict) -> str:
-        default = self.format('')
+        default: str = self.format('')
         if candidate.get('is_root', False):
+            self.cache = self.vim.call('project_lint#get_data')
             return default
 
-        data = self.vim.call('project_lint#get_data')
-        if not data:
+        if not self.cache:
             return default
 
         path = str(candidate['action__path'])
-        if path in data:
+        if path in self.cache:
             return self.format(self.icon)
 
         return default
