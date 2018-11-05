@@ -14,7 +14,7 @@ class Column(Base):
 
     def __init__(self, vim: Nvim) -> None:
         super().__init__(vim)
-        self.name = 'lint'
+        self.name = 'project_lint'
         self.column_length = 2
         self.icon: str = self.vim.vars['project_lint#icon']
         self.color: str = self.vim.vars['project_lint#icon_color']

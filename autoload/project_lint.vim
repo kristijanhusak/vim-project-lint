@@ -26,13 +26,13 @@ function! s:lint.init() abort
 endfunction
 
 function! s:lint.handle_dir_change(event) abort
-  if a:event !=? 'global'
-    return
+  if a:event.scope !=? 'global'
+    return a:event
   endif
 
   let l:new_root = project_lint#utils#get_project_root()
   if l:new_root ==? g:project_lint#root
-    return
+    return a:event
   endif
 
   let g:project_lint#root = l:new_root

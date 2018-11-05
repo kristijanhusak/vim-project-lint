@@ -11,7 +11,7 @@ endfunction
 
 function! s:vimfiler.callback(...) abort
   if &filetype ==? 'vimfiler'
-    return
+    return vimfiler#view#_redraw_screen()
   endif
 
   let l:vimfiler_winnr = bufwinnr('vimfiler')
