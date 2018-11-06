@@ -11,7 +11,7 @@ function! s:lint.new(linters, data, queue, file_explorers) abort
   let l:instance.queue = a:queue
   let l:instance.file_explorers = a:file_explorers
   let l:instance.running = v:false
-  let l:instance.queue.on_finish = funcref('l:instance.finished', [], l:instance)
+  let l:instance.queue.on_single_job_finish = funcref('l:instance.single_job_finished', [], l:instance)
   return l:instance
 endfunction
 
@@ -96,12 +96,18 @@ function! s:lint.should_lint_file(file) abort
   return stridx(a:file, g:project_lint#root) ==? 0
 endfunction
 
-function! s:lint.finished(...) abort
-  call project_lint#utils#debug('Finished running linter.')
+function! s:lint.single_job_finished(is_queue_empty, trigger_callbacks, ...) abort
+  call project_lint#utils#debug('Finished running single linter.')
   call project_lint#utils#update_statusline()
+  if !a:is_queue_empty
+    return
+  endif
+
   let self.running = v:false
   call self.data.use_fresh_data()
-  call call(self.file_explorers.trigger_callbacks, a:000)
+  if a:trigger_callbacks
+    call call(self.file_explorers.trigger_callbacks, a:000)
+  endif
 
   return self.data.cache_to_file()
 endfunction

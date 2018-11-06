@@ -10,7 +10,7 @@ function! s:queue.new(job, data) abort
   let l:instance.data = a:data
   let l:instance.list = {}
   let l:instance.files = {}
-  let l:instance.on_finish = ''
+  let l:instance.on_single_job_finish = ''
   return l:instance
 endfunction
 
@@ -31,28 +31,58 @@ function! s:queue.add_file(linter, file) abort
   let l:id = self.run_job(a:linter.file_command(a:file), a:linter, 'on_file_stdout', a:file)
   let self.list[l:id] = { 'linter': a:linter, 'file': a:file }
   let self.files[a:file] = get(self.files, a:file, {})
-  let self.files[a:file][a:linter.name] = v:true
+  let self.files[a:file][a:linter.name] = 0
 endfunction
 
-function! s:queue.remove(id) abort
-  let l:args = []
-  if has_key(self.list, a:id)
-    if !empty(self.list[a:id].file)
-      call add(l:args, self.list[a:id].file)
+function! s:queue.project_lint_finished(id) abort
+  call remove(self.list, a:id)
+  let l:is_queue_empty = self.is_empty()
+  let l:trigger_callbacks = l:is_queue_empty ? v:true : v:false
+
+  return call(self.on_single_job_finish, [l:is_queue_empty, l:trigger_callbacks])
+endfunction
+
+function! s:queue.file_lint_finished(id, file, linter) abort
+  call remove(self.list, a:id)
+  let l:old_file_state = copy(get(self.data.get(), a:file, {}))
+  let l:is_file_valid = self.files[a:file][a:linter.name] ==? 0
+  let l:action = l:is_file_valid ? 'remove' : 'add'
+  call self.data[l:action](a:linter, a:file)
+
+  let l:is_queue_empty = self.is_empty()
+  let l:trigger_callbacks = v:false
+
+  if !l:is_queue_empty
+    return call(self.on_single_job_finish, [l:is_queue_empty, l:trigger_callbacks, a:file])
+  endif
+
+  for [l:linter_name, l:invalid_count] in items(self.files[a:file])
+    let l:old_invalid_count = get(l:old_file_state, l:linter_name, 0)
+    if l:old_invalid_count !=? l:invalid_count
+      let l:trigger_callbacks = v:true
     endif
-    call remove(self.list, a:id)
-  endif
+  endfor
 
-  if !self.is_empty()
-    return
-  endif
-
-  call call(self.on_finish, l:args)
-  return v:true
+  call remove(self.files, a:file)
+  return call(self.on_single_job_finish, [l:is_queue_empty, l:trigger_callbacks, a:file])
 endfunction
 
 function! s:queue.is_empty() abort
   return len(self.list) ==? 0
+endfunction
+
+function! s:queue.is_linting_project() abort
+  if self.is_empty()
+    return v:false
+  endif
+
+  for [l:id, l:job] in items(self.list)
+    if empty(l:job.file)
+      return v:true
+    endif
+  endfor
+
+  return v:false
 endfunction
 
 function! s:queue.already_linting_file(linter, file) abort
@@ -67,6 +97,52 @@ function! s:queue.already_linting_file(linter, file) abort
   endfor
 
   return v:false
+endfunction
+
+function! s:queue.on_stdout(linter, id, message, event) abort
+  if a:event ==? 'exit'
+    if has_key(self, 'vim_leaved')
+      return
+    endif
+    return self.project_lint_finished(a:id)
+  endif
+
+  if a:event !=? a:linter.stream
+    return
+  endif
+
+  for l:msg in a:message
+    let l:item = a:linter.parse(l:msg)
+    if empty(l:item)
+      continue
+    endif
+
+    call self.data.add(a:linter, l:item)
+  endfor
+endfunction
+
+function! s:queue.on_file_stdout(linter, file, id, message, event) dict
+  if a:event ==? 'exit'
+    if has_key(self, 'vim_leaved')
+      return
+    endif
+    return self.file_lint_finished(a:id, a:file, a:linter)
+  endif
+
+  if a:event !=? a:linter.stream
+    return
+  endif
+
+  for l:msg in a:message
+    let l:item = a:linter.parse(l:msg)
+    if empty(l:item)
+      continue
+    endif
+
+    if l:item ==? a:file
+      let self.files[a:file][a:linter.name] = 1
+    endif
+  endfor
 endfunction
 
 function! s:queue.get_running_linters() abort
@@ -94,56 +170,5 @@ function! s:queue.run_job(cmd, linter, callback, ...) abort
         \ 'on_exit': funcref(l:cb, [a:linter] + a:000, self),
         \ 'cwd': g:project_lint#root
         \ })
-endfunction
-
-function! s:queue.on_stdout(linter, id, message, event) abort
-  if a:event ==? 'exit'
-    if has_key(self, 'vim_leaved')
-      return
-    endif
-    return self.remove(a:id)
-  endif
-
-  if a:event !=? a:linter.stream
-    return
-  endif
-
-  for l:msg in a:message
-    let l:item = a:linter.parse(l:msg)
-    if empty(l:item)
-      continue
-    endif
-
-    call self.data.add(a:linter, l:item)
-  endfor
-endfunction
-
-function! s:queue.on_file_stdout(linter, file, id, message, event) dict
-  if a:event ==? 'exit'
-    if has_key(self, 'vim_leaved')
-      return
-    endif
-    if self.files[a:file][a:linter.name]
-      call self.data.remove(a:linter, a:file)
-    endif
-    return self.remove(a:id)
-  endif
-
-  if a:event !=? a:linter.stream
-    return
-  endif
-
-  for l:msg in a:message
-    let l:item = a:linter.parse(l:msg)
-    if empty(l:item)
-      continue
-    endif
-
-    if l:item ==? a:file
-      let self.files[a:file][a:linter.name] = v:false
-    endif
-
-    call self.data.add(a:linter, l:item)
-  endfor
 endfunction
 
