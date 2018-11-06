@@ -22,7 +22,8 @@ endfunction
 function! s:queue.add_file(linter, file) abort
   let l:id = self.run_job(a:linter.file_command(a:file), a:linter, 'on_file_stdout', a:file)
   let self.list[l:id] = { 'linter': a:linter, 'file': a:file }
-  let self.files[a:file] = v:true
+  let self.files[a:file] = get(self.files, a:file, {})
+  let self.files[a:file][a:linter.name] = v:true
 endfunction
 
 function! s:queue.remove(id) abort
@@ -108,11 +109,8 @@ endfunction
 
 function! s:queue.on_file_stdout(linter, file, id, message, event) dict
   if a:event ==? 'exit'
-    if has_key(self.files, a:file)
-      if self.files[a:file]
-        call self.data.remove(a:linter, a:file)
-      endif
-      call remove(self.files, a:file)
+    if self.files[a:file][a:linter.name]
+      call self.data.remove(a:linter, a:file)
     endif
     return self.remove(a:id)
   endif
@@ -128,7 +126,7 @@ function! s:queue.on_file_stdout(linter, file, id, message, event) dict
     endif
 
     if l:item ==? a:file
-      let self.files[a:file] = v:false
+      let self.files[a:file][a:linter.name] = v:false
     endif
 
     call self.data.add(a:linter, l:item)
