@@ -3,12 +3,12 @@ let s:vint.name = 'vint'
 let s:vint.filetype = ['vim']
 let s:vint.cmd_args = '-e'
 
-function! s:vint.executable() abort
+function! s:vint.check_executable() abort
   if executable('vint')
-    return 'vint'
+    return self.set_cmd('vint')
   endif
 
-  return ''
+  return self.set_cmd('')
 endfunction
 
 call g:project_lint#linters.add(s:vint.new())

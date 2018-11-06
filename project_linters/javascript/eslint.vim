@@ -2,18 +2,18 @@ let s:eslint = copy(project_lint#base_linter#get())
 let s:eslint.name = 'eslint'
 let s:eslint.filetype = ['javascript', 'javascript.jsx']
 
-function! s:eslint.executable() abort
+function! s:eslint.check_executable() abort
   let l:local = printf('%s/node_modules/.bin/eslint', g:project_lint#root)
   let l:global = 'eslint'
   if executable(l:local)
-    return l:local
+    return self.set_cmd(l:local)
   endif
 
   if executable(l:global)
-    return l:global
+    return self.set_cmd(l:global)
   endif
 
-  return ''
+  return self.set_cmd('')
 endfunction
 
 function! s:eslint.command() abort

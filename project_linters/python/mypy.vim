@@ -6,12 +6,12 @@ function! s:mypy.detect() abort
   return !empty(self.cmd) && !empty(project_lint#utils#find_extension('py'))
 endfunction
 
-function! s:mypy.executable() abort
+function! s:mypy.check_executable() abort
   if executable('mypy')
-    return 'mypy'
+    return self.set_cmd('mypy')
   endif
 
-  return ''
+  return self.set_cmd('')
 endfunction
 
 function! s:mypy.command() abort

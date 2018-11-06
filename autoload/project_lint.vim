@@ -51,7 +51,7 @@ function! s:lint.run() abort
   endif
 
   for l:linter in self.linters.get()
-    if l:linter.detect()
+    if l:linter.check_executable() && l:linter.detect()
       call self.set_running(l:linter, '')
       call self.queue.add(l:linter)
     endif
@@ -76,7 +76,7 @@ function! s:lint.run_file(file) abort
   endif
 
   for l:linter in self.linters.get()
-    if l:linter.detect_for_file()
+    if l:linter.check_executable() && l:linter.detect_for_file()
       if self.queue.already_linting_file(l:linter, a:file)
         continue
       endif
