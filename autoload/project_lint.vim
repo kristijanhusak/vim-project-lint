@@ -25,6 +25,10 @@ function! s:lint.init() abort
   return self.run()
 endfunction
 
+function! s:lint.on_vim_leave() abort
+  return self.queue.handle_vim_leave()
+endfunction
+
 function! s:lint.handle_dir_change(event) abort
   if a:event.scope !=? 'global'
     return a:event

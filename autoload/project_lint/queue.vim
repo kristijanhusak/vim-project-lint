@@ -19,6 +19,14 @@ function! s:queue.add(linter) abort
   let self.list[l:id] = { 'linter': a:linter, 'file': '' }
 endfunction
 
+function! s:queue.handle_vim_leave() abort
+  if self.is_empty()
+    return
+  endif
+
+  let self.vim_leaved = v:true
+endfunction
+
 function! s:queue.add_file(linter, file) abort
   let l:id = self.run_job(a:linter.file_command(a:file), a:linter, 'on_file_stdout', a:file)
   let self.list[l:id] = { 'linter': a:linter, 'file': a:file }
@@ -90,6 +98,9 @@ endfunction
 
 function! s:queue.on_stdout(linter, id, message, event) abort
   if a:event ==? 'exit'
+    if has_key(self, 'vim_leaved')
+      return
+    endif
     return self.remove(a:id)
   endif
 
@@ -109,6 +120,9 @@ endfunction
 
 function! s:queue.on_file_stdout(linter, file, id, message, event) dict
   if a:event ==? 'exit'
+    if has_key(self, 'vim_leaved')
+      return
+    endif
     if self.files[a:file][a:linter.name]
       call self.data.remove(a:linter, a:file)
     endif
