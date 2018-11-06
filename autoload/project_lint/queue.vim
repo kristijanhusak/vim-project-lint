@@ -9,6 +9,7 @@ function! s:queue.new(job, data) abort
   let l:instance.job = a:job
   let l:instance.data = a:data
   let l:instance.list = {}
+  let l:instance.post_project_lint_file_list = []
   let l:instance.files = {}
   let l:instance.on_single_job_finish = ''
   return l:instance
@@ -28,8 +29,13 @@ function! s:queue.handle_vim_leave() abort
 endfunction
 
 function! s:queue.add_file(linter, file) abort
-  let l:id = self.run_job(a:linter.file_command(a:file), a:linter, 'on_file_stdout', a:file)
-  let self.list[l:id] = { 'linter': a:linter, 'file': a:file }
+  let l:data = { 'linter': a:linter, 'file': a:file }
+  if self.is_linting_project()
+    call add(self.post_project_lint_file_list, l:data)
+  else
+    let l:id = self.run_job(a:linter.file_command(a:file), a:linter, 'on_file_stdout', a:file)
+    let self.list[l:id] = l:data
+  endif
   let self.files[a:file] = get(self.files, a:file, {})
   let self.files[a:file][a:linter.name] = 0
 endfunction
@@ -38,6 +44,13 @@ function! s:queue.project_lint_finished(id) abort
   call remove(self.list, a:id)
   let l:is_queue_empty = self.is_empty()
   let l:trigger_callbacks = l:is_queue_empty ? v:true : v:false
+
+  if l:is_queue_empty && len(self.post_project_lint_file_list) > 0
+    for l:post_lint_job in self.post_project_lint_file_list
+      call self.add_file(l:post_lint_job.linter, l:post_lint_job.file)
+      call remove(self.post_project_lint_file_list, 0)
+    endfor
+  endif
 
   return call(self.on_single_job_finish, [l:is_queue_empty, l:trigger_callbacks])
 endfunction
@@ -91,7 +104,13 @@ function! s:queue.already_linting_file(linter, file) abort
   endif
 
   for [l:id, l:job] in items(self.list)
-    if l:job.linter.name ==? a:linter.name && !empty(l:job.file) && l:job.file ==? a:file
+    if l:job.linter.name ==? a:linter.name && l:job.file ==? a:file
+      return v:true
+    endif
+  endfor
+
+  for l:post_lint_job in self.post_project_lint_file_list
+    if l:post_lint_job.linter.name ==? a:linter.name && l:post_lint_job.file ==? a:file
       return v:true
     endif
   endfor
