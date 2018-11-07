@@ -1,0 +1,173 @@
+*vim-project-lint.txt*    Project lint status right in your file explorer.
+
+        Project lint status right in your file explorer.
+
+Author: Kristijan <husakkristijan at gmail.com>
+License: MIT
+
+vim-project-lint			    *vim-project-lint*
+
+1. Introduction				|vim-project-lint-introduction|
+2. Install				|vim-project-lint-install|
+3. Settings				|vim-project-lint-settings|
+4. Functions				|vim-project-lint-functions|
+5. Available linters			|vim-project-lint-linters|
+  5.1 Javascript			|vim-project-lint-linter-javascript|
+    5.1.1 eslint			|vim-project-lint-linter-eslint|
+  5.2 python				|vim-project-lint-linter-python|
+    5.2.1 mypy				|vim-project-lint-linter-mypy|
+    5.2.2 flake8			|vim-project-lint-linter-flake8|
+  5.3 go				|vim-project-lint-linter-go|
+    5.3.1 go vet			|vim-project-lint-linter-govet|
+  5.4 vimscript				|vim-project-lint-linter-vimscript|
+    5.5.1 vint				|vim-project-lint-linter-vint|
+
+==============================================================================
+1. Introduction					*vim-project-lint-introduction*
+
+Vim project lint is plugin that shows lint status for your project in your
+favorite file explorer. It supports:
+1. NERDTree - https://github.com/scrooloose/nerdtree
+2. Defx.nvim - https://github.com/Shougo/defx.nvim
+2. Vimfiler.vim - https://github.com/Shougo/vimfiler.vim
+
+Main features:
+
+1. Detects all available file types in your project
+2. Uses available linters for each file type to do the linting
+3. After all linters are ran, presents the state in the file explorer using flags
+4. Updates the status for each file after it is written to disc (BufWritePost)
+
+
+==============================================================================
+2. Install					*vim-project-lint-install*
+
+Requirements:
+
+- Vim or Neovim with "jobs" feature
+- One of these file explorers:
+1. NERDTree - https://github.com/scrooloose/nerdtree
+2. Defx.nvim - https://github.com/Shougo/defx.nvim
+2. Vimfiler.vim - https://github.com/Shougo/vimfiler.vim
+
+Install with `vim-packager`(https://github.com/Kristijanhusak/vim-packager):J
+>
+  function! PackagerInit()
+    packadd vim-packager
+    call packager#add('kristijanhusak/vim-packager', {'type': 'opt'})
+    call packager#add('kristijanhusak/vim-project-lint')
+    "File explorers. Choose your favorite
+    call packager#add('scrooloose/nerdtree')
+    "or...
+    call packager#add('Shougo/defx.nvim')
+    "or...
+    call packager#add('Shougo/vimfiler.vim')
+    " ... Other plugins
+  endfunction
+
+  command! PackagerInstall call PackagerInit() | call packager#install()
+<
+
+Or if you prefer `Plug` (https://github.com/junegunn/vim-plug)
+>
+  Plug 'kristijanhusak/vim-project-lint'
+  "File explorers. Choose your favorite
+  Plug 'scrooloose/nerdtree'
+  "or...
+  Plug 'Shougo/defx.nvim'
+  "or...
+  Plug 'Shougo/vimfiler.vim'
+<
+==============================================================================
+3. Settings					*vim-project-lint-settings*
+
+							*g:project_lint#icon*
+g:project_lint#icon
+		Which icon to use to mark invalid files in file explorer.
+		Example: `let g:project_lint#icon = 'x'`
+
+		Default: `●`
+						  *g:project_lint#icon_color*
+g:project_lint#icon_color
+		Which color to use for the |g:project_lint#icon|
+
+		Example of strict red: `guifg=#FF000`
+
+		Default: `guifg=#fb4934 ctermfg=167`
+					      *g:project_lint#exclude_linters*
+g:project_lint#exclude_linters
+		List of linter names that should not be used, even if they are
+		available.
+
+		Example: `let g:project_lint#exclude_linters = ['mypy']`
+
+		Default: `[]`
+					      *g:project_lint#linter_args*
+g:project_lint#linter_args
+		Dict containing additional arguments that are passed to
+		linter commands.
+
+		Example:
+		`let g:project_lint#linter_args = {`
+		  `\ 'mypy': '--ignore-missing-iports'`
+		  `\ }`
+
+		Default: `{}`
+					      *g:project_lint#cache_dir*
+g:project_lint#cache_dir
+		Each project lint status is cached into a file, which is used
+		later when vim starts, to return instant feedback until the
+		new status is retrieved.
+
+		Default: `~/.cache/vim-project-lint`
+
+==============================================================================
+3. Functions					*vim-project-lint-functions*
+
+						  *project_lint#statusline()*
+project_lint#statusline()
+		Prints the current status of the linter process.
+
+		`set statusline+=%{project_lint#statusline()}`
+
+		Example output (Project linting):
+		`Linting project with: ['eslint', 'mypy']`
+
+		Example output (Single file linting):
+
+==============================================================================
+5. Available Linters				*vim-project-lint-linters*
+
+Below linters are available.
+
+==============================================================================
+5.1 Javascript			     *vim-project-lint-linters-javascript*
+
+==============================================================================
+5.1.1 Eslint			     *vim-project-lint-linters-esilnt*
+
+==============================================================================
+5.2 Python			     *vim-project-lint-linters-python*
+
+==============================================================================
+5.2.1 mypy			     *vim-project-lint-linters-mypy*
+
+==============================================================================
+5.2.2 flake8			     *vim-project-lint-linters-flake8*
+
+==============================================================================
+5.3 Go				     *vim-project-lint-linters-go*
+
+==============================================================================
+5.3.1 go vet			     *vim-project-lint-linters-govet*
+
+aliased as `govet`
+
+==============================================================================
+5.4 Vimscript			     *vim-project-lint-linters-viscript*
+
+==============================================================================
+5.4.1 vint			     *vim-project-lint-linters-vint*
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:noet:
