@@ -23,7 +23,7 @@ endfunction
 function! s:data.check_cache() abort
   let l:filename = self.cache_filename()
   if filereadable(l:filename)
-    let self.cache = json_decode(readfile(l:filename))
+    let self.cache = json_decode(readfile(l:filename)[0])
     let self.use_cache = v:true
     return v:true
   endif
