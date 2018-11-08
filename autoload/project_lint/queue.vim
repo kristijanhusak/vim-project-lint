@@ -46,13 +46,13 @@ function! s:queue.project_lint_finished(id) abort
   let l:trigger_callbacks = l:is_queue_empty ? v:true : v:false
 
   if l:is_queue_empty
-    call self.process_post_project_lit_file_list()
+    call self.process_post_project_lint_file_list()
   endif
 
   return call(self.on_single_job_finish, [l:is_queue_empty, l:trigger_callbacks])
 endfunction
 
-function! s:queue.process_post_project_lit_file_list() abort
+function! s:queue.process_post_project_lint_file_list() abort
   if len(self.post_project_lint_file_list) <=? 0
     return
   endif

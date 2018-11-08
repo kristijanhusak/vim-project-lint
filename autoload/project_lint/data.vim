@@ -20,6 +20,10 @@ function! s:data.get() abort
   return self.paths
 endfunction
 
+function! s:data.get_item(item) abort
+  return self.get()[a:item]
+endfunction
+
 function! s:data.check_cache() abort
   let l:filename = self.cache_filename()
   if filereadable(l:filename)
@@ -31,6 +35,9 @@ function! s:data.check_cache() abort
 endfunction
 
 function! s:data.add(linter, file) abort
+  if a:file !~? printf('^%s', g:project_lint#root)
+    return
+  endif
   let l:should_cache_dirs = self.add_single(a:linter, a:file, v:false)
   let l:dir = fnamemodify(a:file, ':h')
 
@@ -45,6 +52,9 @@ function! s:data.add(linter, file) abort
 endfunction
 
 function! s:data.remove(linter, file) abort
+  if a:file !~? printf('^%s', g:project_lint#root)
+    return
+  endif
   call self.remove_single(a:linter, a:file)
   let l:dir = fnamemodify(a:file, ':h')
 
