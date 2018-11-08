@@ -4,7 +4,7 @@ function! project_lint#file_explorers#vimfiler#new() abort
   return s:vimfiler.new()
 endfunction
 
-function s:vimfiler.new() abort
+function! s:vimfiler.new() abort
   let l:instance = copy(self)
   return l:instance
 endfunction

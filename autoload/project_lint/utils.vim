@@ -93,7 +93,7 @@ function! s:find_extension(extension) abort
   return glob(printf('%s/**/*.%s', g:project_lint#root, a:extension), v:false, v:true)
 endfunction
 
-function project_lint#utils#get_project_root() abort
+function! project_lint#utils#get_project_root() abort
   let l:project_file = findfile('.vimprojectlint', printf('%s;', getcwd()))
   if !empty(l:project_file)
     let l:project_file = fnamemodify(l:project_file, ':p:h')

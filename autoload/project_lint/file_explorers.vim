@@ -28,7 +28,7 @@ function! s:file_explorers.register() abort
   endif
 endfunction
 
-function s:file_explorers.trigger_callbacks(...) abort
+function! s:file_explorers.trigger_callbacks(...) abort
   for l:explorer in self.explorers
     call call(l:explorer.callback, a:000)
   endfor

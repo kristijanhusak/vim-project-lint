@@ -24,8 +24,8 @@
 "   SOFTWARE.
 " }}}
 
-let s:save_cpo = &cpo
-set cpo&vim
+let s:save_cpo = &cpoptions
+set cpoptions&vim
 
 let s:jobidseq = 0
 let s:jobs = {} " { job, opts, type: 'vimjob|nvimjob'}
@@ -254,7 +254,7 @@ endfunction
 " public apis {{{
 let s:job = {}
 
-function project_lint#job#new() abort
+function! project_lint#job#new() abort
   return s:job
 endfunction
 

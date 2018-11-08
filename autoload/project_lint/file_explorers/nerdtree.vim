@@ -13,7 +13,7 @@ function! project_lint#file_explorers#nerdtree#listener(event) abort
   return l:subject.flagSet.clearFlags('project_lint')
 endfunction
 
-function s:nerdtree.new() abort
+function! s:nerdtree.new() abort
   let l:instance = copy(self)
   call l:instance.add_listeners()
   call l:instance.add_autocmd()

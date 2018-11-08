@@ -4,7 +4,7 @@ function! project_lint#file_explorers#defx#new() abort
   return s:defx.new()
 endfunction
 
-function s:defx.new() abort
+function! s:defx.new() abort
   let l:instance = copy(self)
   return l:instance
 endfunction

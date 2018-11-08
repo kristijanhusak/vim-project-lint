@@ -10,7 +10,7 @@ function! project_lint#linters#new() abort
   return s:linters.new()
 endfunction
 
-function s:linters.new() abort
+function! s:linters.new() abort
   let l:instance = copy(self)
   let l:instance.items = {}
   return l:instance
