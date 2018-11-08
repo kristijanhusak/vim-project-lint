@@ -34,6 +34,8 @@ augroup project_lint
   autocmd!
   autocmd VimEnter * call g:project_lint.init()
   autocmd VimLeave * call g:project_lint.on_vim_leave()
-  autocmd DirChanged * call project_lint.handle_dir_change(v:event)
+  if has('nvim') || has('8.0.1459')
+    autocmd DirChanged * call project_lint.handle_dir_change(v:event)
+  endif
   autocmd BufWritePost * call g:project_lint.run_file(expand('<afile>:p'))
 augroup END

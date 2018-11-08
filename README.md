@@ -3,7 +3,7 @@
 **Note**: Still in alpha phase.
 
 Project level lint status right in your favorite file explorer.
-Currently tested only on Neovim 0.3.2-dev on Linux
+Currently tested only on Neovim 0.3.2-dev and Vim 8.0 on Linux
 
 ### Defx.nvim
 ![vim-project-lint-defx](https://user-images.githubusercontent.com/1782860/48164441-c7f4de00-e2e2-11e8-8cb5-2fc9bfc053bb.png)
