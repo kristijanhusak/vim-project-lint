@@ -3,11 +3,19 @@ let s:assert = themis#helper('assert')
 
 let s:cache_dir = expand('<sfile>:p:h')
 let s:cache_file = printf('%s/%s.json', s:cache_dir, tolower(substitute(getcwd(), '/', '-', 'g'))[1:])
+let s:old_cache_dir = g:project_lint#cache_dir
 
 function! s:suite.before() abort
   if filereadable(s:cache_file)
     call delete(s:cache_file)
   endif
+endfunction
+
+function! s:suite.after() abort
+  if filereadable(s:cache_file)
+    call delete(s:cache_file)
+  endif
+  let g:project_lint#cache_dir = s:old_cache_dir
 endfunction
 
 let s:data = project_lint#data#new()

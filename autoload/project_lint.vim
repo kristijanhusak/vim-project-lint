@@ -11,7 +11,7 @@ function! s:lint.new(linters, data, queue, file_explorers) abort
   let l:instance.queue = a:queue
   let l:instance.file_explorers = a:file_explorers
   let l:instance.running = v:false
-  let l:instance.queue.on_single_job_finish = funcref('l:instance.single_job_finished', [], l:instance)
+  let l:instance.queue.on_single_job_finish = function(l:instance.single_job_finished, [], l:instance)
   return l:instance
 endfunction
 

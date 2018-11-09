@@ -1,6 +1,10 @@
 let s:suite = themis#suite('file_explorers')
 let s:assert = themis#helper('assert')
 
+function! s:suite.after() abort
+  unlet! g:loaded_defx g:loaded_nerd_tree g:loaded_vimfiler
+endfunction
+
 let s:file_explorers = project_lint#file_explorers#new()
 
 function! s:suite.should_not_detect_any_file_explorers() abort

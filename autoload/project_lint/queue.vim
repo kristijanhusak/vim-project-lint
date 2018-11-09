@@ -190,11 +190,10 @@ function! s:queue.get_running_linters() abort
 endfunction
 
 function! s:queue.run_job(cmd, linter, callback, ...) abort
-  let l:cb = printf('g:project_lint#queue.%s', a:callback)
   return self.job.start(a:cmd, {
-        \ 'on_stdout': funcref(l:cb, [a:linter] + a:000, self),
-        \ 'on_stderr': funcref(l:cb, [a:linter] + a:000, self),
-        \ 'on_exit': funcref(l:cb, [a:linter] + a:000, self),
+        \ 'on_stdout': function(self[a:callback], [a:linter] + a:000, self),
+        \ 'on_stderr': function(self[a:callback], [a:linter] + a:000, self),
+        \ 'on_exit': function(self[a:callback], [a:linter] + a:000, self),
         \ 'cwd': g:project_lint#root
         \ })
 endfunction

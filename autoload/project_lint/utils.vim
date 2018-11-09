@@ -83,11 +83,15 @@ endfunction
 
 function! s:find_extension(extension) abort
   if executable('rg')
-    return project_lint#utils#system(printf("cd %s && rg --files -t '%s'", g:project_lint#root, a:extension))
+    return project_lint#utils#system(printf("rg --files -t '%s' %s", a:extension, g:project_lint#root))
   endif
 
   if executable('ag')
-    return project_lint#utils#system(printf('cd %s && ag -g "^.*\.%s$"', g:project_lint#root, a:extension))
+    return project_lint#utils#system(printf('ag -g "^.*\.%s$" %s', a:extension, g:project_lint#root))
+  endif
+
+  if executable('find')
+    return project_lint#utils#system(printf('find %s -name "*.%s"', g:project_lint#root, a:extension))
   endif
 
   return glob(printf('%s/**/*.%s', g:project_lint#root, a:extension), v:false, v:true)
