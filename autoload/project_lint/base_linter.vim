@@ -8,7 +8,8 @@ function! s:base.new() abort
   let l:instance = copy(self)
   let l:instance.name = get(l:instance, 'name', '')
   let l:cmd_args = get(self, 'cmd_args', '')
-  let l:instance.cmd_args = get(g:project_lint#linter_args, l:instance.name, l:cmd_args)
+  let l:user_args = get(g:project_lint#linter_args, l:instance.name, '')
+  let l:instance.cmd_args = join(filter([l:cmd_args, l:user_args], 'v:val !=? ""'), ' ')
   let l:instance.stream = get(l:instance, 'stream', 'stdout')
   let l:instance.filetype = get(l:instance, 'filetype', [])
   call l:instance.check_executable()
@@ -28,7 +29,7 @@ function! s:base.check_executable() abort
 endfunction
 
 function! s:base.command() abort
-  return printf('%s %s .', self.cmd, self.cmd_args)
+  return printf('%s %s %s', self.cmd, self.cmd_args, g:project_lint#root)
 endfunction
 
 function! s:base.file_command(file) abort

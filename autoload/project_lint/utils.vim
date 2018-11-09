@@ -39,20 +39,24 @@ function! project_lint#utils#error(text) abort
 endfunction
 
 function! project_lint#utils#parse_unix(item) abort
-  if matchstr(a:item, ':') ==? ''
+  let l:pattern = '^\(\/\?[^:]*\):\d*.*$'
+  if empty(a:item) || a:item !~? l:pattern
     return ''
   endif
 
-  let l:items = split(a:item, ':')
-  if len(l:items) <=? 0
+  let l:list = matchlist(a:item, l:pattern)
+
+  if len(l:list) < 2 || empty(l:list[1])
     return ''
   endif
 
-  if stridx(l:items[0], g:project_lint#root) > -1
-    return l:items[0]
+  let l:item = l:list[1]
+
+  if stridx(l:item, g:project_lint#root) > -1
+    return l:item
   endif
 
-  return printf('%s/%s', g:project_lint#root, l:items[0])
+  return printf('%s/%s', g:project_lint#root, l:item)
 endfunction
 
 let s:extensions_found = {}
@@ -81,17 +85,26 @@ function! project_lint#utils#debug(msg) abort
   return project_lint#utils#echo_line(a:msg)
 endfunction
 
-function! s:find_extension(extension) abort
+function! project_lint#utils#find_extension_cmd(extension) abort
   if executable('rg')
-    return project_lint#utils#system(printf("rg --files -t '%s' %s", a:extension, g:project_lint#root))
+    return printf("rg --files -g '*.%s' %s", a:extension, g:project_lint#root)
   endif
 
   if executable('ag')
-    return project_lint#utils#system(printf('ag -g "^.*\.%s$" %s', a:extension, g:project_lint#root))
+    return printf('ag -g "^.*\.%s$" %s', a:extension, g:project_lint#root)
   endif
 
   if executable('find')
-    return project_lint#utils#system(printf('find %s -name "*.%s"', g:project_lint#root, a:extension))
+    return printf('find %s -name "*.%s"', g:project_lint#root, a:extension)
+  endif
+
+  return ''
+endfunction
+
+function! s:find_extension(extension) abort
+  let l:cmd = project_lint#utils#find_extension_cmd(a:extension)
+  if !empty(l:cmd)
+    return project_lint#utils#system(l:cmd)
   endif
 
   return glob(printf('%s/**/*.%s', g:project_lint#root, a:extension), v:false, v:true)

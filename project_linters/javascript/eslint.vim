@@ -1,6 +1,7 @@
 let s:eslint = copy(project_lint#base_linter#get())
 let s:eslint.name = 'eslint'
 let s:eslint.filetype = ['javascript', 'javascript.jsx']
+let s:eslint.cmd_args = '--format=unix'
 
 function! s:eslint.check_executable() abort
   let l:local = printf('%s/node_modules/.bin/eslint', g:project_lint#root)
@@ -14,14 +15,6 @@ function! s:eslint.check_executable() abort
   endif
 
   return self.set_cmd('')
-endfunction
-
-function! s:eslint.command() abort
-  return printf('%s --format=unix %s .', self.cmd, self.cmd_args)
-endfunction
-
-function! s:eslint.file_command(file) abort
-  return printf('%s --format=unix %s %s', self.cmd, self.cmd_args, a:file)
 endfunction
 
 call g:project_lint#linters.add(s:eslint.new())

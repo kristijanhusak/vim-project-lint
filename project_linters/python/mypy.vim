@@ -15,7 +15,7 @@ function! s:mypy.check_executable() abort
 endfunction
 
 function! s:mypy.command() abort
-  return printf('%s %s **/*.py', self.cmd, self.cmd_args)
+  return printf('%s %s %s/**/*.py', self.cmd, self.cmd_args, g:project_lint#root)
 endfunction
 
 call g:project_lint#linters.add(s:mypy.new())

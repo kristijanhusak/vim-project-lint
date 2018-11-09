@@ -1,9 +1,13 @@
 let s:linters = {}
 let s:filetypes = {
       \ 'javascript': ['project_lint#utils#has_file_in_cwd', 'package.json'],
+      \ 'typescript': ['project_lint#utils#find_extension', 'ts'],
       \ 'python': ['project_lint#utils#find_extension', 'py'],
       \ 'go': ['project_lint#utils#find_extension', 'go'],
       \ 'vim': ['project_lint#utils#find_extension', 'vim'],
+      \ 'css': ['project_lint#utils#find_extension', 'css'],
+      \ 'scss': ['project_lint#utils#find_extension', 'scss'],
+      \ 'sass': ['project_lint#utils#find_extension', 'sass'],
       \ }
 
 function! project_lint#linters#new() abort
