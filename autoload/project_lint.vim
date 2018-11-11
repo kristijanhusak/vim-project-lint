@@ -110,5 +110,6 @@ function! s:lint.single_job_finished(is_queue_empty, trigger_callbacks, ...) abo
 
   let self.running = v:false
   call self.data.use_fresh_data()
+  call call(self.file_explorers.trigger_callbacks, a:000)
   return self.data.cache_to_file()
 endfunction
