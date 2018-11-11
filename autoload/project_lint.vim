@@ -99,15 +99,16 @@ endfunction
 function! s:lint.single_job_finished(is_queue_empty, trigger_callbacks, ...) abort
   call project_lint#utils#debug('Finished running single linter.')
   call project_lint#utils#update_statusline()
+
+  if a:trigger_callbacks
+    call call(self.file_explorers.trigger_callbacks, a:000)
+  endif
+
   if !a:is_queue_empty
     return
   endif
 
   let self.running = v:false
   call self.data.use_fresh_data()
-  if a:trigger_callbacks
-    call call(self.file_explorers.trigger_callbacks, a:000)
-  endif
-
   return self.data.cache_to_file()
 endfunction

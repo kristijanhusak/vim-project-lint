@@ -37,6 +37,10 @@ function! s:linters.get() abort
   return values(self.items)
 endfunction
 
+function! s:linters.get_linter(name) abort
+  return get(self.items, a:name, {})
+endfunction
+
 function! s:linters.add(linter) abort
   if !has_key(self.items, a:linter.name)
     let self.items[a:linter.name] = a:linter

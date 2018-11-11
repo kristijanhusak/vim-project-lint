@@ -9,7 +9,7 @@ let s:job = project_lint#job#new()
 let s:linters = project_lint#linters#new()
 call s:linters.add(s:linter_mock)
 let s:data = project_lint#data#new()
-let s:queue = project_lint#queue#new(s:job, s:data)
+let s:queue = project_lint#queue#new(s:job, s:data, s:linters)
 let s:file_explorers = project_lint#file_explorers#new()
 
 let s:project_lint = project_lint#new(s:linters, s:data, s:queue, s:file_explorers)

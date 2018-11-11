@@ -14,8 +14,12 @@ let g:project_lint#root = project_lint#utils#get_project_root()
 let g:project_lint#file_explorers = project_lint#file_explorers#new()
 let g:project_lint#job = project_lint#job#new()
 let g:project_lint#data = project_lint#data#new()
-let g:project_lint#queue = project_lint#queue#new(g:project_lint#job, g:project_lint#data)
 let g:project_lint#linters = project_lint#linters#new()
+let g:project_lint#queue = project_lint#queue#new(
+      \ g:project_lint#job,
+      \ g:project_lint#data,
+      \ g:project_lint#linters
+      \ )
 let g:project_lint = project_lint#new(
       \ g:project_lint#linters,
       \ g:project_lint#data,

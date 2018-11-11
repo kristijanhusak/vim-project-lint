@@ -7,7 +7,8 @@ let s:file_mock = s:mock_functions.get_mock_file()
 
 let s:data = project_lint#data#new()
 let s:job = project_lint#job#new()
-let s:queue = project_lint#queue#new(s:job, s:data)
+let s:linters = project_lint#linters#new()
+let s:queue = project_lint#queue#new(s:job, s:data, s:linters)
 
 function! s:suite.should_be_empty_on_start() abort
   call s:assert.true(s:queue.is_empty())

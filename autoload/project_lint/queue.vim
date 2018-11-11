@@ -1,13 +1,14 @@
 let s:queue = {}
 
-function! project_lint#queue#new(job, data) abort
-  return s:queue.new(a:job, a:data)
+function! project_lint#queue#new(job, data, linters) abort
+  return s:queue.new(a:job, a:data, a:linters)
 endfunction
 
-function! s:queue.new(job, data) abort
+function! s:queue.new(job, data, linters) abort
   let l:instance = copy(self)
   let l:instance.job = a:job
   let l:instance.data = a:data
+  let l:instance.linters = a:linters
   let l:instance.list = {}
   let l:instance.post_project_lint_file_list = []
   let l:instance.files = {}
@@ -41,12 +42,26 @@ function! s:queue.add_file(linter, file) abort
 endfunction
 
 function! s:queue.project_lint_finished(id) abort
+  let l:linter = self.list[a:id].linter
   call remove(self.list, a:id)
   let l:is_queue_empty = self.is_empty()
-  let l:trigger_callbacks = l:is_queue_empty ? v:true : v:false
+  let l:trigger_callbacks = v:true
 
   if l:is_queue_empty
     call self.process_post_project_lint_file_list()
+  else
+    for l:running_linter_name in self.get_running_linters().project
+      let l:running_linter = self.linters.get_linter(l:running_linter_name)
+      for l:filetype in l:running_linter.filetype
+        if index(l:linter.filetype, l:filetype) > -1
+          let l:trigger_callbacks = v:false
+          break
+        endif
+      endfor
+      if !l:trigger_callbacks
+        break
+      endif
+    endfor
   endif
 
   return call(self.on_single_job_finish, [l:is_queue_empty, l:trigger_callbacks])
