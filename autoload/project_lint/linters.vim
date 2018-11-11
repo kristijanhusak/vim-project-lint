@@ -8,6 +8,10 @@ let s:filetypes = {
       \ 'css': ['project_lint#utils#find_extension', 'css'],
       \ 'scss': ['project_lint#utils#find_extension', 'scss'],
       \ 'sass': ['project_lint#utils#find_extension', 'sass'],
+      \ 'ruby': ['project_lint#utils#find_extension', 'rb'],
+      \ 'php': ['project_lint#utils#find_extension', 'php'],
+      \ 'lua': ['project_lint#utils#find_extension', 'lua'],
+      \ 'rust': ['project_lint#utils#find_extension', 'rs'],
       \ }
 
 function! project_lint#linters#new() abort

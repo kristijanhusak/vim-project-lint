@@ -1,7 +1,7 @@
 let s:tslint = copy(project_lint#base_linter#get())
 let s:tslint.name = 'tslint'
 let s:tslint.filetype = ['typescript']
-let s:tslint.cmd_args = '--outputAbsolutePaths'
+let s:tslint.cmd_args = '--outputAbsolutePaths --format msbuild'
 
 function! s:tslint.check_executable() abort
   let l:local = printf('%s/node_modules/.bin/tslint', g:project_lint#root)
@@ -23,11 +23,7 @@ endfunction
 
 function! s:tslint.command() abort
   let l:ext_cmd = project_lint#utils#find_extension_cmd('ts')
-  return printf('%s | grep -v node_modules | xargs %s --format msbuild %s', l:ext_cmd, self.cmd, self.cmd_args)
-endfunction
-
-function! s:tslint.file_command(file) abort
-  return printf('%s --format msbuild %s %s', self.cmd, self.cmd_args, a:file)
+  return printf('%s | grep -v node_modules | xargs %s %s', l:ext_cmd, self.cmd, self.cmd_args)
 endfunction
 
 function! s:tslint.parse(item) abort

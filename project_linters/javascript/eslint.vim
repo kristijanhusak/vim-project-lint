@@ -1,6 +1,6 @@
 let s:eslint = copy(project_lint#base_linter#get())
 let s:eslint.name = 'eslint'
-let s:eslint.filetype = ['javascript', 'javascript.jsx']
+let s:eslint.filetype = ['javascript', 'javascript.jsx', 'typescript']
 let s:eslint.cmd_args = '--format=unix'
 
 function! s:eslint.check_executable() abort
@@ -17,4 +17,10 @@ function! s:eslint.check_executable() abort
   return self.set_cmd('')
 endfunction
 
-call g:project_lint#linters.add(s:eslint.new())
+let s:instance = s:eslint.new()
+
+function project_linters#javascript#eslint#get() abort
+  return s:instance
+endfunction
+
+call g:project_lint#linters.add(s:instance)

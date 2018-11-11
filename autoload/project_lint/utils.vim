@@ -156,3 +156,8 @@ endfunction
 function! s:restore_shell(saved_shell) abort
   let [&shell, &shellcmdflag, &shellredir] = a:saved_shell
 endfunction
+
+function! project_lint#utils#xargs_lint_command(extension, cmd, cmd_args) abort
+  let l:ext_cmd = project_lint#utils#find_extension_cmd(a:extension)
+  return printf('%s | xargs -L 1 %s %s', l:ext_cmd,  a:cmd, a:cmd_args)
+endfunction

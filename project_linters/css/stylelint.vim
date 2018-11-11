@@ -21,4 +21,10 @@ function! s:stylelint.file_command(file) abort
   return printf('%s %s %s', self.cmd, self.cmd_args, a:file)
 endfunction
 
-call g:project_lint#linters.add(s:stylelint.new())
+let s:instance = s:stylelint.new()
+
+function! project_linters#css#stylelint#get() abort
+  return s:instance
+endfunction
+
+call g:project_lint#linters.add(s:instance)
