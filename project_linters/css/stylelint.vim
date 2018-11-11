@@ -6,8 +6,14 @@ let s:stylelint.filetype = ['css', 'scss', 'sass']
 let s:stylelint.cmd_args = '--no-color -f unix'
 
 function! s:stylelint.check_executable() abort
-  if executable('stylelint')
-    return self.set_cmd('stylelint')
+  let l:local = printf('%s/node_modules/.bin/stylelint', g:project_lint#root)
+  let l:global = 'stylelint'
+  if executable(l:local)
+    return self.set_cmd(l:local)
+  endif
+
+  if executable(l:global)
+    return self.set_cmd(l:global)
   endif
 
   return self.set_cmd('')
