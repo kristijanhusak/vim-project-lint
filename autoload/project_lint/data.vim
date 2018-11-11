@@ -35,18 +35,18 @@ function! s:data.check_cache() abort
 endfunction
 
 function! s:data.add(linter, file) abort
-  if a:file !~? printf('^%s', g:project_lint#root)
+  if a:file.path !~? printf('^%s', g:project_lint#root)
     return
   endif
   let l:should_cache_dirs = self.add_single(a:linter, a:file, v:false)
-  let l:dir = fnamemodify(a:file, ':h')
+  let l:dir = fnamemodify(a:file.path, ':h')
 
   if l:dir ==? g:project_lint#root || !l:should_cache_dirs
     return
   endif
 
   while l:dir !=? g:project_lint#root
-    call self.add_single(a:linter, l:dir, v:true)
+    call self.add_single(a:linter, extend(copy(a:file), {'path': l:dir }), v:true)
     let l:dir = fnamemodify(l:dir, ':h')
   endwhile
 endfunction
@@ -69,23 +69,25 @@ function! s:data.remove(linter, file) abort
 endfunction
 
 function! s:data.add_single(linter, file, is_dir) abort
-  if !has_key(self.paths, a:file)
-    let self.paths[a:file] = {}
-    let self.paths[a:file][a:linter.name] = 1
+  if !has_key(self.paths, a:file.path)
+    let self.paths[a:file.path] = {}
+    let self.paths[a:file.path][a:linter.name] = { 'w': 0, 'e': 0 }
+    let self.paths[a:file.path][a:linter.name][a:file.type] = 1
     return v:true
   endif
 
-  if !has_key(self.paths[a:file], a:linter.name)
-    let self.paths[a:file][a:linter.name] = 1
+  if !has_key(self.paths[a:file.path], a:linter.name)
+    let self.paths[a:file.path][a:linter.name] = { 'w': 0, 'e': 0 }
+    let self.paths[a:file.path][a:linter.name][a:file.type] = 1
     return v:true
   endif
 
   "Do not mark same thing as invalid more than once
-  if !a:is_dir && self.paths[a:file][a:linter.name] > 0
+  if !a:is_dir && self.paths[a:file.path][a:linter.name][a:file.type] > 0
     return v:false
   endif
 
-  let self.paths[a:file][a:linter.name] += 1
+  let self.paths[a:file.path][a:linter.name][a:file.type] += 1
   return v:true
 endfunction
 
@@ -94,12 +96,14 @@ function! s:data.remove_single(linter, file) abort
     return
   endif
 
-  if self.paths[a:file][a:linter.name] > 0
-    let self.paths[a:file][a:linter.name] -= 1
+  if self.paths[a:file][a:linter.name].w > 0
+    let self.paths[a:file][a:linter.name].w -= 1
+  endif
+  if self.paths[a:file][a:linter.name].e > 0
+    let self.paths[a:file][a:linter.name].e -= 1
   endif
 
-
-  if self.paths[a:file][a:linter.name] <=? 0
+  if self.paths[a:file][a:linter.name].w <=? 0 && self.paths[a:file][a:linter.name].e <=? 0
     call remove(self.paths[a:file], a:linter.name)
   endif
 
