@@ -30,16 +30,16 @@ function! s:tslint.parse(item) abort
   let l:pattern = '^\(\/[^(]*\)([^)]*).*$'
 
   if empty(a:item) || a:item !~? l:pattern
-    return ''
+    return {}
   endif
 
   let l:list = matchlist(a:item, l:pattern)
 
   if len(l:list) < 2 || empty(l:list[1])
-    return ''
+    return {}
   endif
 
-  return l:list[1]
+  return self.error(l:list[1])
 endfunction
 
 call g:project_lint#linters.add(s:tslint.new())

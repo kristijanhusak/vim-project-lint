@@ -19,12 +19,12 @@ function! s:column.length(files, context) abort
 endfunction
 
 function! s:column.define_syntax(context) abort
-  silent! exe printf('hi default vimfilerColumn__ProjectLint %s', g:project_lint#icon_color)
+  silent! exe printf('hi default vimfilerColumn__ProjectLint %s', g:project_lint#error_icon_color)
 endfunction
 
 function! s:column.get(file, context) abort
   if has_key(g:project_lint#get_data(), a:file.action__path)
-    return '['.g:project_lint#icon.']'
+    return '['.g:project_lint#error_icon.']'
   endif
 
   return '  '

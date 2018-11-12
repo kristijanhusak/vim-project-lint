@@ -13,10 +13,10 @@ endfunction
 
 function! s:rubocop.parse(item) abort
   if a:item =~? '^\/.*\.rb$'
-    return a:item
+    return self.error(a:item)
   endif
 
-  return ''
+  return {}
 endfunction
 
 call g:project_lint#linters.add(s:rubocop.new())

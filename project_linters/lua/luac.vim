@@ -17,7 +17,12 @@ function! s:luac.command() abort
 endfunction
 
 function! s:luac.parse(item) abort
-  return project_lint#utils#parse_unix(substitute(a:item, '^luac:\s', '', ''))
+  let l:path = project_lint#utils#parse_unix(substitute(a:item, '^luac:\s', '', ''))
+  if empty(l:path)
+    return {}
+  endif
+
+  return self.error(l:path)
 endfunction
 
 call g:project_lint#linters.add(s:luac.new())

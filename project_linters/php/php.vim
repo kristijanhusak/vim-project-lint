@@ -20,21 +20,21 @@ function! s:php.parse(item) abort
   let l:pattern = '\v^.*(Parse|Fatal) error:.*in (.*\.php) on.*$'
 
   if a:item !~? l:pattern
-    return ''
+    return {}
   endif
 
   let l:matches = matchlist(a:item, l:pattern)
 
 
   if len(l:matches) < 3 || empty(l:matches[2])
-    return ''
+    return {}
   endif
 
   if stridx(l:matches[2], g:project_lint#root) > -1
-    return l:matches[2]
+    return self.error(l:matches[2])
   endif
 
-  return printf('%s/%s', g:project_lint#root, l:matches[2])
+  return self.error(printf('%s/%s', g:project_lint#root, l:matches[2]))
 endfunction
 
 call g:project_lint#linters.add(s:php.new())

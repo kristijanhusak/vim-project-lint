@@ -17,6 +17,22 @@ function! s:eslint.check_executable() abort
   return self.set_cmd('')
 endfunction
 
+function! s:eslint.parse(item) abort
+  let l:path = project_lint#utils#parse_unix(a:item)
+  if empty(l:path)
+    return {}
+  endif
+
+  let l:type_pattern = '^.*\s\[\(Warning\|Error\)\/[^\]]*\]$'
+  let l:matches = matchlist(a:item, l:type_pattern)
+
+  if len(l:matches) > 1 && !empty(l:matches[1]) && l:matches[1] ==? 'Warning'
+    return self.warning(l:path)
+  endif
+
+  return self.error(l:path)
+endfunction
+
 let s:instance = s:eslint.new()
 
 function project_linters#javascript#eslint#get() abort

@@ -38,7 +38,7 @@ function! s:queue.add_file(linter, file) abort
     let self.list[l:id] = l:data
   endif
   let self.files[a:file] = get(self.files, a:file, {})
-  let self.files[a:file][a:linter.name] = 0
+  let self.files[a:file][a:linter.name] = {}
 endfunction
 
 function! s:queue.project_lint_finished(id) abort
@@ -81,9 +81,10 @@ endfunction
 function! s:queue.file_lint_finished(id, file, linter) abort
   call remove(self.list, a:id)
   let l:old_file_state = copy(get(self.data.get(), a:file, {}))
-  let l:is_file_valid = self.files[a:file][a:linter.name] ==? 0
-  let l:action = l:is_file_valid ? 'remove' : 'add'
-  call self.data[l:action](a:linter, a:file)
+  call self.data.remove(a:linter, a:file)
+  if !empty(self.files[a:file][a:linter.name])
+    call self.data.add(a:linter, self.files[a:file][a:linter.name])
+  endif
 
   let l:is_queue_empty = self.is_empty()
   let l:trigger_callbacks = v:false
@@ -92,9 +93,10 @@ function! s:queue.file_lint_finished(id, file, linter) abort
     return call(self.on_single_job_finish, [l:is_queue_empty, l:trigger_callbacks, a:file])
   endif
 
-  for [l:linter_name, l:invalid_count] in items(self.files[a:file])
-    let l:old_invalid_count = get(l:old_file_state, l:linter_name, 0)
-    if l:old_invalid_count !=? l:invalid_count
+  for [l:linter_name, l:invalid_state] in items(self.files[a:file])
+    let l:old_invalid_count = has_key(l:old_file_state, l:linter_name) ? 1 : 0
+    let l:current_count = !empty(l:invalid_state) ? 1 : 0
+    if l:old_invalid_count !=? l:current_count
       let l:trigger_callbacks = v:true
     endif
   endfor
@@ -181,8 +183,8 @@ function! s:queue.on_file_stdout(linter, file, id, message, event) abort dict
       continue
     endif
 
-    if l:item ==? a:file
-      let self.files[a:file][a:linter.name] = 1
+    if l:item.path ==? a:file
+      let self.files[a:file][a:linter.name] = l:item
     endif
   endfor
 endfunction

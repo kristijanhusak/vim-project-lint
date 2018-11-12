@@ -107,7 +107,7 @@ function! s:data.remove_single(linter, file) abort
     call remove(self.paths[a:file], a:linter.name)
   endif
 
-  if empty(self.paths[a:file])
+  if len(self.paths[a:file]) <= 2
     call remove(self.paths, a:file)
   endif
 endfunction
@@ -119,6 +119,26 @@ function! s:data.cache_filename() abort
 endfunction
 
 function! s:data.use_fresh_data() abort
+  for l:file in keys(self.paths)
+    let l:warnings = 0
+    let l:errors = 0
+    for [l:linter, l:data] in items(self.paths[l:file])
+      if l:linter ==? 'w' || l:linter ==? 'e'
+        continue
+      endif
+
+      if get(l:data, 'w', 0) > 0
+        let l:warnings = 1
+      endif
+
+      if get(l:data, 'e', 0) > 0
+        let l:errors = 1
+      endif
+    endfor
+
+    let self.paths[l:file].w = l:warnings
+    let self.paths[l:file].e = l:errors
+  endfor
   let self.use_cache = v:false
   let self.cache = {}
 endfunction

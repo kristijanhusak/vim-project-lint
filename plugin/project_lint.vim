@@ -4,8 +4,10 @@ if exists('g:loaded_project_lint')
 endif
 let g:loaded_project_lint = v:true
 
-let g:project_lint#icon = get(g:, 'project_lint#icon', '●')
-let g:project_lint#icon_color = get(g:, 'project_lint#icon_color', 'guifg=#fb4934 ctermfg=167')
+let g:project_lint#error_icon = get(g:, 'project_lint#error_icon', '●')
+let g:project_lint#warning_icon = get(g:, 'project_lint#warning_icon', '⚠')
+let g:project_lint#error_icon_color = get(g:, 'project_lint#error_icon_color', 'guifg=#fb4934 ctermfg=167')
+let g:project_lint#warning_icon_color = get(g:, 'project_lint#warning_icon_color', 'ctermfg=214 guifg=#fabd2f')
 let g:project_lint#exclude_linters = get(g:, 'project_lint#exclude_linters', [])
 let g:project_lint#linter_args = get(g:, 'project_lint#linter_args', {})
 let g:project_lint#debug = get(g:, 'project_lint#debug', v:false)

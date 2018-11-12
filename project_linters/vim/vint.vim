@@ -12,7 +12,7 @@ function! s:vint.check_executable() abort
 endfunction
 
 function! s:vint.parse(item) abort
-  let l:pattern = '^\([^:]*\):\(.\).*$'
+  let l:pattern = '^\([^:]*\):\(.*\)$'
   if a:item !~? l:pattern
     return {}
   endif
@@ -21,7 +21,11 @@ function! s:vint.parse(item) abort
     return {}
   endif
 
-  return { 'path': l:matches[1], 'type': l:matches[2] }
+  if l:matches[2] ==? 'warning'
+    return self.warning(l:matches[1])
+  endif
+
+  return self.error(l:matches[1])
 endfunction
 
 call g:project_lint#linters.add(s:vint.new())

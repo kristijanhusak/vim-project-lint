@@ -81,15 +81,15 @@ Or if you prefer `Plug` (https://github.com/junegunn/vim-plug)
 ==============================================================================
 3. Settings					*vim-project-lint-settings*
 
-							*g:project_lint#icon*
-g:project_lint#icon
+							*g:project_lint#error_icon*
+g:project_lint#error_icon
 		Which icon to use to mark invalid files in file explorer.
-		Example: `let g:project_lint#icon = 'x'`
+		Example: `let g:project_lint#error_icon = 'x'`
 
 		Default: `●`
-						  *g:project_lint#icon_color*
-g:project_lint#icon_color
-		Which color to use for the |g:project_lint#icon|
+						  *g:project_lint#error_icon_color*
+g:project_lint#error_icon_color
+		Which color to use for the |g:project_lint#error_icon|
 
 		Example of strict red: `guifg=#FF000`
 

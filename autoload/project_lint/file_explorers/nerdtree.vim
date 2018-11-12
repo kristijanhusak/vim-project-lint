@@ -8,7 +8,7 @@ function! project_lint#file_explorers#nerdtree#listener(event) abort
   let l:subject = a:event.subject
   let l:path = l:subject.str()
   if has_key(g:project_lint#data.get(), l:path)
-    return l:subject.flagSet.addFlag('project_lint', g:project_lint#icon)
+    return l:subject.flagSet.addFlag('project_lint', g:project_lint#error_icon)
   endif
   return l:subject.flagSet.clearFlags('project_lint')
 endfunction
@@ -99,6 +99,6 @@ function! s:add_highlighting() abort
   if exists('g:loaded_nerdtree_git_status')
     let l:padding = '[^\(\[\|\]\)]*\zs'
   endif
-  silent! exe printf('syn match NERDTreeProjectLintIcon #%s%s# containedin=NERDTreeFlags', l:padding, g:project_lint#icon)
-  silent! exe printf('hi default NERDTreeProjectLintIcon %s', g:project_lint#icon_color)
+  silent! exe printf('syn match NERDTreeProjectLintIcon #%s%s# containedin=NERDTreeFlags', l:padding, g:project_lint#error_icon)
+  silent! exe printf('hi default NERDTreeProjectLintIcon %s', g:project_lint#error_icon_color)
 endfunction

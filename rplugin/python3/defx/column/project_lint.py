@@ -16,8 +16,10 @@ class Column(Base):
         super().__init__(vim)
         self.name = 'project_lint'
         self.column_length = 2
-        self.icon: str = self.vim.vars['project_lint#icon']
-        self.color: str = self.vim.vars['project_lint#icon_color']
+        self.error_icon: str = self.vim.vars['project_lint#error_icon']
+        self.error_color: str = self.vim.vars['project_lint#error_icon_color']
+        self.warning_icon: str = self.vim.vars['project_lint#warning_icon']
+        self.warning_color: str = self.vim.vars['project_lint#warning_icon_color']
         self.cache: typing.Dict[str, dict] = {}
 
     def get(self, context: Context, candidate: dict) -> str:
@@ -31,7 +33,8 @@ class Column(Base):
 
         path = str(candidate['action__path'])
         if path in self.cache:
-            return self.format(self.icon)
+            return self.format(self.error_icon if self.cache[path]['e'] else
+                               self.warning_icon)
 
         return default
 
@@ -44,8 +47,8 @@ class Column(Base):
     def highlight(self) -> None:
         self.vim.command(('syntax match {0}_{1} /[{2}]/ ' +
                           'contained containedin={0}').format(
-                              self.syntax_name, self.name, self.icon
+                              self.syntax_name, self.name, self.error_icon
                           ))
         self.vim.command('highlight default {0}_{1} {2}'.format(
-            self.syntax_name, self.name, self.color
+            self.syntax_name, self.name, self.error_color
         ))
