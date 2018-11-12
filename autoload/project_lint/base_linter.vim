@@ -38,7 +38,7 @@ function! s:base.file_command(file) abort
 endfunction
 
 function! s:base.parse(item) abort
-  let l:path = project_lint#utils#parse_unix(a:item)
+  let l:path = project_lint#parsers#unix(a:item)
   if empty(l:path)
     return {}
   endif
@@ -52,11 +52,11 @@ function! s:base.set_cmd(cmd) abort
 endfunction
 
 function! s:base.error(path) abort
-  return { 'path': a:path, 'type': 'e' }
+  return { 'path': a:path, 'severity': 'e' }
 endfunction
 
 function! s:base.warning(path) abort
-  return { 'path': a:path, 'type': 'w' }
+  return { 'path': a:path, 'severity': 'w' }
 endfunction
 
 function! s:base.parse_messages(messages) abort

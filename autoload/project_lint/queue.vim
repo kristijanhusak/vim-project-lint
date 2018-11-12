@@ -64,6 +64,10 @@ function! s:queue.project_lint_finished(id) abort
     endfor
   endif
 
+  if l:trigger_callbacks
+    call self.data.add_total_severity_counters()
+  endif
+
   return call(self.on_single_job_finish, [l:is_queue_empty, l:trigger_callbacks])
 endfunction
 
@@ -93,13 +97,19 @@ function! s:queue.file_lint_finished(id, file, linter) abort
     return call(self.on_single_job_finish, [l:is_queue_empty, l:trigger_callbacks, a:file])
   endif
 
-  for [l:linter_name, l:invalid_state] in items(self.files[a:file])
-    let l:old_invalid_count = has_key(l:old_file_state, l:linter_name) ? 1 : 0
-    let l:current_count = !empty(l:invalid_state) ? 1 : 0
-    if l:old_invalid_count !=? l:current_count
-      let l:trigger_callbacks = v:true
-    endif
-  endfor
+  call self.data.add_total_severity_counters(a:file)
+  let l:new_file_state = copy(get(self.data.get(), a:file, {}))
+
+  if empty(l:new_file_state) !=? empty(l:old_file_state)
+    let l:trigger_callbacks = v:true
+  else
+    let l:old_warning = get(l:old_file_state, 'w', 0)
+    let l:old_error = get(l:old_file_state, 'e', 0)
+    let l:new_warning = get(l:new_file_state, 'w', 0)
+    let l:new_error = get(l:new_file_state, 'e', 0)
+
+    let l:trigger_callbacks = l:old_warning !=? l:new_warning || l:old_error !=? l:new_error
+  endif
 
   call remove(self.files, a:file)
   return call(self.on_single_job_finish, [l:is_queue_empty, l:trigger_callbacks, a:file])

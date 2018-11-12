@@ -17,7 +17,7 @@ function! s:luac.command() abort
 endfunction
 
 function! s:luac.parse(item) abort
-  let l:path = project_lint#utils#parse_unix(substitute(a:item, '^luac:\s', '', ''))
+  let l:path = project_lint#parsers#unix(substitute(a:item, '^luac:\s', '', ''))
   if empty(l:path)
     return {}
   endif

@@ -19,13 +19,26 @@ function! s:column.length(files, context) abort
 endfunction
 
 function! s:column.define_syntax(context) abort
-  silent! exe printf('hi default vimfilerColumn__ProjectLint %s', g:project_lint#error_icon_color)
+  silent! exe printf("syntax match vimfilerColumn__ProjectLintError '\[%s\]' containedin=vimfilerColumn__ProjectLint", g:project_lint#error_icon)
+  silent! exe printf("syntax match vimfilerColumn__ProjectLintWarning '\[%s\]' containedin=vimfilerColumn__ProjectLint", g:project_lint#warning_icon)
+  silent! exe printf('hi default vimfilerColumn__ProjectLintError %s', g:project_lint#error_icon_color)
+  silent! exe printf('hi default vimfilerColumn__ProjectLintWarning %s', g:project_lint#warning_icon_color)
 endfunction
 
 function! s:column.get(file, context) abort
-  if has_key(g:project_lint#get_data(), a:file.action__path)
+  let l:default = '   '
+  let l:data = get(g:project_lint#get_data(), a:file.action__path, {})
+  if empty(l:data)
+    return l:default
+  endif
+
+  if get(l:data, 'e', 0) > 0
     return '['.g:project_lint#error_icon.']'
   endif
 
-  return '  '
+  if get(l:data, 'w', 0) > 0
+    return '['.g:project_lint#warning_icon.']'
+  endif
+
+  return l:default
 endfunction

@@ -1,7 +1,7 @@
 let s:vint = copy(project_lint#base_linter#get())
 let s:vint.name = 'vint'
 let s:vint.filetype = ['vim']
-let s:vint.cmd_args = printf('-w -f "{file_path}:{severity}" %s', has('nvim') ? ' --enable-neovim' : '')
+let s:vint.cmd_args = printf('-w -f "{file_path}:{line_number}:{severity}" %s', has('nvim') ? ' --enable-neovim' : '')
 
 function! s:vint.check_executable() abort
   if executable('vint')
@@ -12,20 +12,11 @@ function! s:vint.check_executable() abort
 endfunction
 
 function! s:vint.parse(item) abort
-  let l:pattern = '^\([^:]*\):\(.*\)$'
-  if a:item !~? l:pattern
-    return {}
-  endif
-  let l:matches = matchlist(a:item, l:pattern)
-  if len(l:matches) < 3 || empty(l:matches[1])
-    return {}
-  endif
-
-  if l:matches[2] ==? 'warning'
-    return self.warning(l:matches[1])
-  endif
-
-  return self.error(l:matches[1])
+  return project_lint#parsers#unix_with_severity(
+        \ a:item,
+        \ '^[^:]*:\d*:\(.*\)$',
+        \ 'warning'
+        \ )
 endfunction
 
 call g:project_lint#linters.add(s:vint.new())

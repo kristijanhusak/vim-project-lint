@@ -21,7 +21,7 @@ function! s:data.get() abort
 endfunction
 
 function! s:data.get_item(item) abort
-  return self.get()[a:item]
+  return get(self.get(), a:item, {})
 endfunction
 
 function! s:data.check_cache() abort
@@ -72,22 +72,22 @@ function! s:data.add_single(linter, file, is_dir) abort
   if !has_key(self.paths, a:file.path)
     let self.paths[a:file.path] = {}
     let self.paths[a:file.path][a:linter.name] = { 'w': 0, 'e': 0 }
-    let self.paths[a:file.path][a:linter.name][a:file.type] = 1
+    let self.paths[a:file.path][a:linter.name][a:file.severity] = 1
     return v:true
   endif
 
   if !has_key(self.paths[a:file.path], a:linter.name)
     let self.paths[a:file.path][a:linter.name] = { 'w': 0, 'e': 0 }
-    let self.paths[a:file.path][a:linter.name][a:file.type] = 1
+    let self.paths[a:file.path][a:linter.name][a:file.severity] = 1
     return v:true
   endif
 
   "Do not mark same thing as invalid more than once
-  if !a:is_dir && self.paths[a:file.path][a:linter.name][a:file.type] > 0
+  if !a:is_dir && self.paths[a:file.path][a:linter.name][a:file.severity] > 0
     return v:false
   endif
 
-  let self.paths[a:file.path][a:linter.name][a:file.type] += 1
+  let self.paths[a:file.path][a:linter.name][a:file.severity] += 1
   return v:true
 endfunction
 
@@ -119,28 +119,55 @@ function! s:data.cache_filename() abort
 endfunction
 
 function! s:data.use_fresh_data() abort
-  for l:file in keys(self.paths)
-    let l:warnings = 0
-    let l:errors = 0
-    for [l:linter, l:data] in items(self.paths[l:file])
-      if l:linter ==? 'w' || l:linter ==? 'e'
-        continue
-      endif
-
-      if get(l:data, 'w', 0) > 0
-        let l:warnings = 1
-      endif
-
-      if get(l:data, 'e', 0) > 0
-        let l:errors = 1
-      endif
-    endfor
-
-    let self.paths[l:file].w = l:warnings
-    let self.paths[l:file].e = l:errors
-  endfor
   let self.use_cache = v:false
   let self.cache = {}
+endfunction
+
+function! s:data.add_total_severity_counters(...) abort
+  if a:0 <=? 0
+    for l:file in keys(self.paths)
+      call self.add_single_severity_counter(l:file)
+    endfor
+    return
+  endif
+
+  let l:file = a:1
+  let l:dir = fnamemodify(l:file, ':h')
+  let l:is_added = self.add_single_severity_counter(l:file)
+
+  if l:dir ==? g:project_lint#root || !l:is_added
+    return
+  endif
+
+  while l:dir !=? g:project_lint#root
+    call self.add_single_severity_counter(l:dir)
+    let l:dir = fnamemodify(l:dir, ':h')
+  endwhile
+endfunction
+
+function! s:data.add_single_severity_counter(file) abort
+  if !has_key(self.paths, a:file)
+    return v:false
+  endif
+  let l:warnings = 0
+  let l:errors = 0
+  for [l:linter, l:data] in items(self.paths[a:file])
+    if l:linter ==? 'w' || l:linter ==? 'e'
+      continue
+    endif
+
+    if get(l:data, 'w', 0) > 0
+      let l:warnings = 1
+    endif
+
+    if get(l:data, 'e', 0) > 0
+      let l:errors = 1
+    endif
+  endfor
+
+  let self.paths[a:file].w = l:warnings
+  let self.paths[a:file].e = l:errors
+  return v:true
 endfunction
 
 function! s:data.cache_to_file() abort

@@ -26,5 +26,10 @@ function! s:linter_mock.detect() abort
 endfunction
 
 function! s:linter_mock.parse(msg) abort
+  return {'path': a:msg, 'severity': 'e'}
   return a:msg
+endfunction
+
+function! s:linter_mock.parse_messages(messages) abort
+  return a:messages
 endfunction

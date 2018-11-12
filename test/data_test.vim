@@ -21,7 +21,7 @@ endfunction
 let s:data = project_lint#data#new()
 
 function s:get_path(path, type) abort
-  return { 'path': printf('%s/%s', getcwd(), a:path), 'type': a:type }
+  return { 'path': printf('%s/%s', getcwd(), a:path), 'severity': a:type }
 endfunction
 
 let s:linter = {'name': 'vinter'}
@@ -54,6 +54,13 @@ function! s:suite.should_add_file_and_all_its_parents_folders_until_root() abort
   call s:assert.equals(s:data.get_item(s:get_path('nested/path/inside/folders', 'w').path), {'vinter': { 'e': 1, 'w': 1 }})
   call s:assert.has_key(s:data.get(), s:get_path('nested/path/inside/folders/myfile.vim', 'w').path)
   call s:assert.equals(s:data.get_item(s:get_path('nested/path/inside/folders/myfile.vim', 'w').path), {'vinter': { 'e': 1, 'w': 1 }})
+
+  call s:data.add_total_severity_counters(s:get_path('nested/path/inside/folders/myfile.vim', 'w').path)
+  call s:assert.equals(s:data.get_item(s:get_path('nested', 'w').path), {'vinter': {'e': 1, 'w': 1 }, 'e': 1, 'w': 1 })
+  call s:assert.equals(s:data.get_item(s:get_path('nested/path', 'w').path), {'vinter': {'e': 1, 'w': 1 }, 'e': 1, 'w': 1 })
+  call s:assert.equals(s:data.get_item(s:get_path('nested/path/inside', 'w').path), {'vinter': { 'e': 1, 'w': 1 }, 'e': 1, 'w': 1 })
+  call s:assert.equals(s:data.get_item(s:get_path('nested/path/inside/folders', 'w').path), {'vinter': { 'e': 1, 'w': 1 }, 'e': 1, 'w': 1 })
+  call s:assert.equals(s:data.get_item(s:get_path('nested/path/inside/folders/myfile.vim', 'w').path), {'vinter': { 'e': 1, 'w': 1 }, 'e': 1, 'w': 1 })
 endfunction
 
 function! s:suite.should_remove_file_and_all_its_parents_folders_until_root() abort
@@ -72,16 +79,17 @@ endfunction
 "
 function! s:suite.should_add_file_and_all_its_parents_folders_until_root_and_cache_to_file() abort
   call s:data.add(s:linter, s:get_path('nested/path/inside/folders/myfile.vim', 'e'))
+  call s:data.add_total_severity_counters(s:get_path('nested/path/inside/folders/myfile.vim', 'w').path)
   call s:assert.has_key(s:data.get(), s:get_path('nested', 'e').path)
-  call s:assert.equals(s:data.get_item(s:get_path('nested', 'e').path), {'vinter': {'e': 1, 'w': 0 }})
+  call s:assert.equals(s:data.get_item(s:get_path('nested', 'e').path), {'vinter': {'e': 1, 'w': 0 }, 'e': 1, 'w': 0 })
   call s:assert.has_key(s:data.get(), s:get_path('nested/path', 'e').path)
-  call s:assert.equals(s:data.get_item(s:get_path('nested/path', 'e').path), {'vinter': {'e': 1, 'w': 0 }})
+  call s:assert.equals(s:data.get_item(s:get_path('nested/path', 'e').path), {'vinter': {'e': 1, 'w': 0 }, 'e': 1, 'w': 0 })
   call s:assert.has_key(s:data.get(), s:get_path('nested/path/inside', 'e').path)
-  call s:assert.equals(s:data.get_item(s:get_path('nested/path/inside', 'e').path), {'vinter': { 'e': 1, 'w': 0 }})
+  call s:assert.equals(s:data.get_item(s:get_path('nested/path/inside', 'e').path), {'vinter': { 'e': 1, 'w': 0 }, 'e': 1, 'w': 0 })
   call s:assert.has_key(s:data.get(), s:get_path('nested/path/inside/folders', 'e').path)
-  call s:assert.equals(s:data.get_item(s:get_path('nested/path/inside/folders', 'e').path), {'vinter': { 'e': 1, 'w': 0 }})
+  call s:assert.equals(s:data.get_item(s:get_path('nested/path/inside/folders', 'e').path), {'vinter': { 'e': 1, 'w': 0 }, 'e': 1, 'w': 0 })
   call s:assert.has_key(s:data.get(), s:get_path('nested/path/inside/folders/myfile.vim', 'e').path)
-  call s:assert.equals(s:data.get_item(s:get_path('nested/path/inside/folders/myfile.vim', 'e').path), {'vinter': { 'e': 1, 'w': 0 }})
+  call s:assert.equals(s:data.get_item(s:get_path('nested/path/inside/folders/myfile.vim', 'e').path), {'vinter': { 'e': 1, 'w': 0 }, 'e': 1, 'w': 0 })
   let g:project_lint#cache_dir = s:cache_dir
   call s:assert.equals(s:data.cache_filename(), s:cache_file)
   call s:assert.false(filereadable(s:cache_file))
@@ -89,15 +97,15 @@ function! s:suite.should_add_file_and_all_its_parents_folders_until_root_and_cac
   call s:assert.true(filereadable(s:cache_file))
   let l:file_data = json_decode(readfile(s:cache_file)[0])
   call s:assert.has_key(l:file_data, s:get_path('nested', 'e').path)
-  call s:assert.equals(l:file_data[s:get_path('nested', 'e').path], {'vinter': { 'e': 1, 'w': 0 }})
+  call s:assert.equals(l:file_data[s:get_path('nested', 'e').path], {'vinter': { 'e': 1, 'w': 0 }, 'e': 1, 'w': 0 })
   call s:assert.has_key(l:file_data, s:get_path('nested/path', 'e').path)
-  call s:assert.equals(l:file_data[s:get_path('nested/path', 'e').path], {'vinter': {'e': 1, 'w': 0 }})
+  call s:assert.equals(l:file_data[s:get_path('nested/path', 'e').path], {'vinter': {'e': 1, 'w': 0 }, 'e': 1, 'w': 0 })
   call s:assert.has_key(l:file_data, s:get_path('nested/path/inside', 'e').path)
-  call s:assert.equals(l:file_data[s:get_path('nested/path/inside', 'e').path], {'vinter': {'e': 1, 'w': 0 }})
+  call s:assert.equals(l:file_data[s:get_path('nested/path/inside', 'e').path], {'vinter': {'e': 1, 'w': 0 }, 'e': 1, 'w': 0 })
   call s:assert.has_key(l:file_data, s:get_path('nested/path/inside/folders', 'e').path)
-  call s:assert.equals(l:file_data[s:get_path('nested/path/inside/folders', 'e').path], {'vinter': {'e': 1, 'w': 0 }})
+  call s:assert.equals(l:file_data[s:get_path('nested/path/inside/folders', 'e').path], {'vinter': {'e': 1, 'w': 0 }, 'e': 1, 'w': 0 })
   call s:assert.has_key(l:file_data, s:get_path('nested/path/inside/folders/myfile.vim', 'e').path)
-  call s:assert.equals(l:file_data[s:get_path('nested/path/inside/folders/myfile.vim', 'e').path], {'vinter': {'e': 1, 'w': 0 }})
+  call s:assert.equals(l:file_data[s:get_path('nested/path/inside/folders/myfile.vim', 'e').path], {'vinter': {'e': 1, 'w': 0 }, 'e': 1, 'w': 0 })
 endfunction
 
 function! s:suite.should_use_cache_if_toggled_on() abort

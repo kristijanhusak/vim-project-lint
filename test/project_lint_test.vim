@@ -31,5 +31,5 @@ function! s:suite.should_init_if_one_of_file_explorers_are_detected() abort
   call s:assert.equals(s:project_lint.running, v:false)
   call s:assert.length_of(s:queue.list, 0)
   call s:assert.length_of(s:data.get(), 1)
-  call s:assert.equals(s:data.get_item(s:file_mock), { 'my_linter': 1 })
+  call s:assert.equals(s:data.get_item(s:file_mock), { 'my_linter': { 'e': 1, 'w': 0 }, 'e': 1, 'w': 0 })
 endfunction

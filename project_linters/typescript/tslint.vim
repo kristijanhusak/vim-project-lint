@@ -33,13 +33,13 @@ function! s:tslint.parse(item) abort
   endif
 
   let l:file = get(a:item, 'name', '')
-  let l:type = get(a:item, 'ruleSeverity', 'ERROR')
+  let l:severity = get(a:item, 'ruleSeverity', 'ERROR')
 
   if empty(l:file)
     return {}
   endif
 
-  if l:type ==? 'WARNING'
+  if l:severity ==? 'WARNING'
     return self.warning(l:file)
   endif
 

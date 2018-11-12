@@ -18,19 +18,11 @@ function! s:eslint.check_executable() abort
 endfunction
 
 function! s:eslint.parse(item) abort
-  let l:path = project_lint#utils#parse_unix(a:item)
-  if empty(l:path)
-    return {}
-  endif
-
-  let l:type_pattern = '^.*\s\[\(Warning\|Error\)\/[^\]]*\]$'
-  let l:matches = matchlist(a:item, l:type_pattern)
-
-  if len(l:matches) > 1 && !empty(l:matches[1]) && l:matches[1] ==? 'Warning'
-    return self.warning(l:path)
-  endif
-
-  return self.error(l:path)
+  return project_lint#parsers#unix_with_severity(
+        \ a:item,
+        \ '^.*\s\[\(Warning\|Error\)\/[^\]]*\]$',
+        \ 'Warning'
+        \ )
 endfunction
 
 let s:instance = s:eslint.new()

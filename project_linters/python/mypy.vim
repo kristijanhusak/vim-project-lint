@@ -19,19 +19,12 @@ function! s:mypy.command() abort
 endfunction
 
 function! s:mypy.parse(item) abort
-  let l:file = project_lint#utils#parse_unix(a:item)
-  if empty(l:file)
-    return {}
-  endif
-
-  let l:pattern = '^[^:]*:\d\+:\d\+: \(error|warning\): .\+$'
-  let l:matches = matchlist(a:item, l:pattern)
-
-  if len(l:matches) >= 2 && l:matches[1] ==? 'error'
-    return self.error(l:file)
-  endif
-
-  return self.warning(l:file)
+  return project_lint#parsers#unix_with_severity(
+        \ a:item,
+        \ '^[^:]*:\d*: \(error\)\?.*$',
+        \ 'error',
+        \ v:true
+        \ )
 endfunction
 
 call g:project_lint#linters.add(s:mypy.new())

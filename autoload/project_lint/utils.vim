@@ -38,27 +38,6 @@ function! project_lint#utils#error(text) abort
   echohl NONE
 endfunction
 
-function! project_lint#utils#parse_unix(item) abort
-  let l:pattern = '^\(\/\?[^:]*\):\d*.*$'
-  if empty(a:item) || a:item !~? l:pattern
-    return ''
-  endif
-
-  let l:list = matchlist(a:item, l:pattern)
-
-  if len(l:list) < 2 || empty(l:list[1])
-    return ''
-  endif
-
-  let l:item = l:list[1]
-
-  if stridx(l:item, g:project_lint#root) > -1
-    return l:item
-  endif
-
-  return printf('%s/%s', g:project_lint#root, l:item)
-endfunction
-
 let s:extensions_found = {}
 function! project_lint#utils#find_extension(extension) abort
   if has_key(s:extensions_found, a:extension)

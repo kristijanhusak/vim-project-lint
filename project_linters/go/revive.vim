@@ -22,14 +22,14 @@ function! s:revive.parse(item) abort
   endif
 
 
-  let l:type = get(a:item, 'Severity', 'error')
+  let l:severity = get(a:item, 'Severity', 'error')
   let l:file = project_lint#utils#get_nested_key(a:item, 'Position.Start.Filename')
 
   if empty(l:file)
     return {}
   endif
 
-  if l:type ==? 'warning'
+  if l:severity ==? 'warning'
     return self.warning(l:file)
   endif
 

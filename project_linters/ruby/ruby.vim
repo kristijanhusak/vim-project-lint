@@ -17,24 +17,11 @@ function! s:ruby.command() abort
 endfunction
 
 function! s:ruby.parse(item) abort
-  let l:path = project_lint#utils#parse_unix(a:item)
-  if empty(l:path)
-    return {}
-  endif
-
-  let l:pattern = '^[^:]*:\d*: \(warning\)\?.*$'
-  let l:matches = matchlist(a:item, l:pattern)
-  echom string(l:matches)
-
-  if len(l:matches) < 2
-    return {}
-  endif
-
-  if l:matches[1] ==? 'warning'
-    return self.warning(l:path)
-  endif
-
-  return self.error(l:path)
+  return project_lint#parsers#unix_with_severity(
+        \ a:item,
+        \ '^[^:]*:\d*: \(warning\)\?.*$',
+        \ 'warning'
+        \ )
 endfunction
 
 call project_lint#linters.add(s:ruby.new())

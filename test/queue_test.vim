@@ -30,7 +30,7 @@ function! s:suite.should_add_project_job() abort
   call s:assert.empty(s:queue.list)
   call s:assert.has_key(s:data.paths, s:file_mock)
   call s:assert.has_key(s:data.paths[s:file_mock], 'my_linter')
-  call s:assert.equals(s:data.paths[s:file_mock].my_linter, 1)
+  call s:assert.equals(s:data.paths[s:file_mock].my_linter, {'e': 1, 'w': 0})
 endfunction
 
 function! s:suite.should_add_file_job() abort
@@ -50,7 +50,7 @@ function! s:suite.should_add_file_job() abort
   call s:assert.empty(s:queue.list)
   call s:assert.has_key(s:data.paths, s:file_mock)
   call s:assert.has_key(s:data.paths[s:file_mock], 'my_linter')
-  call s:assert.equals(s:data.paths[s:file_mock].my_linter, 1)
+  call s:assert.equals(s:data.paths[s:file_mock].my_linter, {'e': 1, 'w': 0})
 endfunction
 
 
@@ -106,5 +106,5 @@ function! s:suite.should_add_file_to_after_project_lint_list_queue() abort
   call s:assert.empty(s:queue.list)
   call s:assert.has_key(s:data.paths, s:file_mock)
   call s:assert.has_key(s:data.paths[s:file_mock], 'my_linter')
-  call s:assert.equals(s:data.paths[s:file_mock].my_linter, 1)
+  call s:assert.equals(s:data.paths[s:file_mock].my_linter, {'e': 1, 'w': 0})
 endfunction
