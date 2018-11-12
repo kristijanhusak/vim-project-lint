@@ -155,7 +155,9 @@ function! s:queue.on_stdout(linter, id, message, event) abort
     return
   endif
 
-  for l:msg in a:message
+  let l:messages = a:linter.parse_messages(a:message)
+
+  for l:msg in l:messages
     let l:item = a:linter.parse(l:msg)
     if empty(l:item)
       continue
@@ -177,7 +179,8 @@ function! s:queue.on_file_stdout(linter, file, id, message, event) abort dict
     return
   endif
 
-  for l:msg in a:message
+  let l:messages = a:linter.parse_messages(a:message)
+  for l:msg in l:messages
     let l:item = a:linter.parse(l:msg)
     if empty(l:item)
       continue

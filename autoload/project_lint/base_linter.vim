@@ -12,6 +12,7 @@ function! s:base.new() abort
   let l:instance.cmd_args = join(filter([l:cmd_args, l:user_args], 'v:val !=? ""'), ' ')
   let l:instance.stream = get(l:instance, 'stream', 'stdout')
   let l:instance.filetype = get(l:instance, 'filetype', [])
+  let l:instance.format = get(l:instance, 'format', 'unix')
   call l:instance.check_executable()
   return l:instance
 endfunction
@@ -56,4 +57,22 @@ endfunction
 
 function! s:base.warning(path) abort
   return { 'path': a:path, 'type': 'w' }
+endfunction
+
+function! s:base.parse_messages(messages) abort
+  let l:msg = a:messages
+
+  if self.format ==? 'json' && !empty(a:messages[0])
+    try
+      let l:msg = json_decode(a:messages[0])
+    catch
+      return []
+    endtry
+
+    if type(l:msg) !=? type([])
+      return []
+    endif
+  endif
+
+  return l:msg
 endfunction

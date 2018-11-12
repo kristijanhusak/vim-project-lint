@@ -18,4 +18,20 @@ function! s:mypy.command() abort
   return printf('%s %s %s/**/*.py', self.cmd, self.cmd_args, g:project_lint#root)
 endfunction
 
+function! s:mypy.parse(item) abort
+  let l:file = project_lint#utils#parse_unix(a:item)
+  if empty(l:file)
+    return {}
+  endif
+
+  let l:pattern = '^[^:]*:\d\+:\d\+: \(error|warning\): .\+$'
+  let l:matches = matchlist(a:item, l:pattern)
+
+  if len(l:matches) >= 2 && l:matches[1] ==? 'error'
+    return self.error(l:file)
+  endif
+
+  return self.warning(l:file)
+endfunction
+
 call g:project_lint#linters.add(s:mypy.new())

@@ -10,4 +10,19 @@ function! s:flake8.check_executable() abort
   return self.set_cmd('')
 endfunction
 
+function! s:flake8.parse(item) abort
+  let l:file = project_lint#utils#parse_unix(a:item)
+  if empty(l:file)
+    return {}
+  endif
+  let l:pattern = '^[^:]*:\d\+:\d\+: \(.\).*$'
+  let l:matches = matchlist(a:item, l:pattern)
+
+  if len(l:matches) >= 2 && l:matches[1] ==? 'W'
+    return self.warning(l:file)
+  endif
+
+  return self.error(l:file)
+endfunction
+
 call g:project_lint#linters.add(s:flake8.new())

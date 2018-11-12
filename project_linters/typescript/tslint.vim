@@ -1,7 +1,8 @@
 let s:tslint = copy(project_lint#base_linter#get())
 let s:tslint.name = 'tslint'
 let s:tslint.filetype = ['typescript']
-let s:tslint.cmd_args = '--outputAbsolutePaths --format msbuild'
+let s:tslint.cmd_args = '--outputAbsolutePaths --format json'
+let s:tslint.format = 'json'
 
 function! s:tslint.check_executable() abort
   let l:local = printf('%s/node_modules/.bin/tslint', g:project_lint#root)
@@ -27,19 +28,22 @@ function! s:tslint.command() abort
 endfunction
 
 function! s:tslint.parse(item) abort
-  let l:pattern = '^\(\/[^(]*\)([^)]*).*$'
-
-  if empty(a:item) || a:item !~? l:pattern
+  if empty(a:item)
     return {}
   endif
 
-  let l:list = matchlist(a:item, l:pattern)
+  let l:file = get(a:item, 'name', '')
+  let l:type = get(a:item, 'ruleSeverity', 'ERROR')
 
-  if len(l:list) < 2 || empty(l:list[1])
+  if empty(l:file)
     return {}
   endif
 
-  return self.error(l:list[1])
+  if l:type ==? 'WARNING'
+    return self.warning(l:file)
+  endif
+
+  return self.error(l:file)
 endfunction
 
 call g:project_lint#linters.add(s:tslint.new())

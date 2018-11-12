@@ -161,3 +161,25 @@ function! project_lint#utils#xargs_lint_command(extension, cmd, cmd_args) abort
   let l:ext_cmd = project_lint#utils#find_extension_cmd(a:extension)
   return printf('%s | xargs -L 1 %s %s', l:ext_cmd,  a:cmd, a:cmd_args)
 endfunction
+
+function! project_lint#utils#get_nested_key(dict, key, ...) abort
+  let l:items = split(a:key, '\.')
+  let l:result = get(a:dict, l:items[0], {})
+  let l:default = a:0 > 0 ? a:1 : {}
+  if empty(l:result)
+    return l:default
+  endif
+
+  for l:item in l:items[1:]
+    if type(l:result) !=? type({})
+      return l:default
+    endif
+
+    let l:result = get(l:result, l:item, {})
+    if empty(l:result)
+      return l:default
+    endif
+  endfor
+
+  return l:result
+endfunction

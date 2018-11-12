@@ -27,6 +27,22 @@ function! s:stylelint.file_command(file) abort
   return printf('%s %s %s', self.cmd, self.cmd_args, a:file)
 endfunction
 
+function! s:stylelint.parse(item) abort
+  let l:path = project_lint#utils#parse_unix(a:item)
+  if empty(l:path)
+    return {}
+  endif
+
+  let l:pattern = '^.*\s\[\(error\|warning\)\]$'
+  let l:matches = matchlist(a:item, l:pattern)
+
+  if len(l:matches) >= 2 && !empty(l:matches[1]) && l:matches[1] ==? 'warning'
+    return self.warning(l:path)
+  endif
+
+  return self.error(l:path)
+endfunction
+
 let s:instance = s:stylelint.new()
 
 function! project_linters#css#stylelint#get() abort
