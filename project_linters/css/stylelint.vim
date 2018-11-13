@@ -20,7 +20,13 @@ function! s:stylelint.check_executable() abort
 endfunction
 
 function! s:stylelint.command() abort
-  return printf('%s %s %s/**/*.{%s}', self.cmd, self.cmd_args, g:project_lint#root, join(self.filetype, ','))
+  return printf(
+        \ '%s %s %s/**/*.{%s}',
+        \ self.cmd,
+        \ self.cmd_args,
+        \ g:project_lint#root,
+        \ join(self.enabled_filetype, ',')
+        \ )
 endfunction
 
 function! s:stylelint.file_command(file) abort

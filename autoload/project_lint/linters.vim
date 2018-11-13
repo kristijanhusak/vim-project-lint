@@ -46,3 +46,29 @@ function! s:linters.add(linter) abort
     let self.items[a:linter.name] = a:linter
   endif
 endfunction
+
+function! s:linters.get_enabled_filetypes(linter) abort
+  let l:filetypes = copy(a:linter.filetype)
+  for l:ft in l:filetypes
+    if !has_key(g:project_lint#enabled_linters, l:ft)
+      continue
+    endif
+    let l:data = g:project_lint#enabled_linters[l:ft]
+    if index(l:data, a:linter.name) < 0
+      call remove(l:filetypes, index(l:filetypes, l:ft))
+    endif
+  endfor
+
+  return l:filetypes
+endfunction
+
+function! s:linters.is_linter_enabled(linter) abort
+  return !empty(self.get_enabled_filetypes(a:linter))
+endfunction
+
+function! s:linters.is_linter_enabled_for_filetype(linter, filetype) abort
+  if !has_key(g:project_lint#enabled_linters, a:filetype)
+    return v:true
+  endif
+  return index(g:project_lint#enabled_linters[a:filetype], a:linter.name) > -1
+endfunction

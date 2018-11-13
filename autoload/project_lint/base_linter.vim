@@ -13,16 +13,17 @@ function! s:base.new() abort
   let l:instance.stream = get(l:instance, 'stream', 'stdout')
   let l:instance.filetype = get(l:instance, 'filetype', [])
   let l:instance.format = get(l:instance, 'format', 'unix')
+  let l:instance.enabled_filetype = g:project_lint#linters.get_enabled_filetypes(l:instance)
   call l:instance.check_executable()
   return l:instance
 endfunction
 
 function! s:base.detect() abort
-  return !empty(self.cmd)
+  return !empty(self.cmd) && !empty(self.enabled_filetype)
 endfunction
 
 function! s:base.detect_for_file() abort
-  return !empty(self.cmd) && index(self.filetype, &filetype) > -1
+  return !empty(self.cmd) && index(self.enabled_filetype, &filetype) > -1
 endfunction
 
 function! s:base.check_executable() abort
