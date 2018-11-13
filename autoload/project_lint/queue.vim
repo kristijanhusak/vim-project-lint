@@ -41,7 +41,7 @@ function! s:queue.add_file(linter, file) abort
   let self.files[a:file][a:linter.name] = {}
 endfunction
 
-function! s:queue.project_lint_finished(id) abort
+function! s:queue.project_lint_finished(id, linter) abort
   let l:linter = self.list[a:id].linter
   call remove(self.list, a:id)
   let l:is_queue_empty = self.is_empty()
@@ -68,7 +68,7 @@ function! s:queue.project_lint_finished(id) abort
     call self.data.add_total_severity_counters()
   endif
 
-  return call(self.on_single_job_finish, [l:is_queue_empty, l:trigger_callbacks])
+  return call(self.on_single_job_finish, [a:linter, l:is_queue_empty, l:trigger_callbacks])
 endfunction
 
 function! s:queue.process_post_project_lint_file_list() abort
@@ -94,7 +94,7 @@ function! s:queue.file_lint_finished(id, file, linter) abort
   let l:trigger_callbacks = v:false
 
   if !l:is_queue_empty
-    return call(self.on_single_job_finish, [l:is_queue_empty, l:trigger_callbacks, a:file])
+    return call(self.on_single_job_finish, [a:linter, l:is_queue_empty, l:trigger_callbacks, a:file])
   endif
 
   call self.data.add_total_severity_counters(a:file)
@@ -112,7 +112,7 @@ function! s:queue.file_lint_finished(id, file, linter) abort
   endif
 
   call remove(self.files, a:file)
-  return call(self.on_single_job_finish, [l:is_queue_empty, l:trigger_callbacks, a:file])
+  return call(self.on_single_job_finish, [a:linter, l:is_queue_empty, l:trigger_callbacks, a:file])
 endfunction
 
 function! s:queue.is_empty() abort
@@ -154,11 +154,12 @@ function! s:queue.already_linting_file(linter, file) abort
 endfunction
 
 function! s:queue.on_stdout(linter, id, message, event) abort
+  call project_lint#utils#debug(printf('Linter [%s] output for [project]: %s: %s', a:linter.name, a:event, string(a:message)))
   if a:event ==? 'exit'
     if has_key(self, 'vim_leaved')
       return
     endif
-    return self.project_lint_finished(a:id)
+    return self.project_lint_finished(a:id, a:linter)
   endif
 
   if a:event !=? a:linter.stream
@@ -178,6 +179,7 @@ function! s:queue.on_stdout(linter, id, message, event) abort
 endfunction
 
 function! s:queue.on_file_stdout(linter, file, id, message, event) abort dict
+  call project_lint#utils#debug(printf('Linter [%s] output for [%s]: %s: %s', a:linter.name, a:file, a:event, string(a:message)))
   if a:event ==? 'exit'
     if has_key(self, 'vim_leaved')
       return

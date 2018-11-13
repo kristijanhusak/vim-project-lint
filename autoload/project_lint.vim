@@ -12,15 +12,21 @@ function! s:lint.new(linters, data, queue, file_explorers) abort
   let l:instance.file_explorers = a:file_explorers
   let l:instance.running = v:false
   let l:instance.queue.on_single_job_finish = function(l:instance.single_job_finished, [], l:instance)
+  let l:instance.initialized = v:false
   return l:instance
 endfunction
 
 function! s:lint.init() abort
+  if !project_lint#utils#check_jobs_support()
+    return project_lint#utils#error('Vim 8.* with "jobs" feature required.')
+  endif
+
   if !self.file_explorers.has_valid_file_explorer()
     return project_lint#utils#error('No file explorer found. Install NERDTree, defx.nvim or vimfiler.')
   endif
   call self.linters.load()
   call self.file_explorers.register()
+  let self.initialized = v:true
 
   return self.run()
 endfunction
@@ -44,6 +50,10 @@ function! s:lint.handle_dir_change(event) abort
 endfunction
 
 function! s:lint.run() abort
+  if !self.initialized
+    return
+  endif
+
   if self.running
     return project_lint#utils#error('Project lint already running.')
   endif
@@ -68,13 +78,18 @@ function! s:lint.set_running(linter, file) abort
   let l:cmd = !empty(a:file) ? a:linter.file_command(a:file) : a:linter.command()
 
   call project_lint#utils#debug(printf(
-        \ 'Running command "%s" for linter "%s".',
-        \ l:cmd,
-        \ a:linter.name
+        \ 'Linter [%s] running command for [%s]: "%s"',
+        \ a:linter.name,
+        \ !empty(a:file) ? a:file : 'project',
+        \ l:cmd
         \ ))
 endfunction
 
 function! s:lint.run_file(file) abort
+  if !self.initialized
+    return
+  endif
+
   if !self.should_lint_file(a:file)
     return
   endif
@@ -96,8 +111,9 @@ function! s:lint.should_lint_file(file) abort
   return stridx(a:file, g:project_lint#root) ==? 0
 endfunction
 
-function! s:lint.single_job_finished(is_queue_empty, trigger_callbacks, ...) abort
-  call project_lint#utils#debug('Finished running single linter.')
+function! s:lint.single_job_finished(linter, is_queue_empty, trigger_callbacks, ...) abort
+  let l:type = a:0 > 0 ? a:1 : 'project'
+  call project_lint#utils#debug(printf('Linter [%s] for [%s] finished.', a:linter.name, l:type))
   call project_lint#utils#update_statusline()
 
   if a:trigger_callbacks

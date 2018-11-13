@@ -29,7 +29,11 @@ endfunction
 
 function! project_lint#utils#echo_line(text) abort
   silent! exe 'redraw'
-  echom a:text
+  let l:text = a:text
+  if type(l:text) !=? type('')
+    let l:text = string(l:text)
+  endif
+  echom printf('[project-lint]: %s', l:text)
 endfunction
 
 function! project_lint#utils#error(text) abort
@@ -161,4 +165,8 @@ function! project_lint#utils#get_nested_key(dict, key, ...) abort
   endfor
 
   return l:result
+endfunction
+
+function! project_lint#utils#check_jobs_support() abort
+  return has('nvim') || has('job')
 endfunction
