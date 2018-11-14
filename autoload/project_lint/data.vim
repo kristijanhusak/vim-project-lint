@@ -9,6 +9,7 @@ function! s:data.new() abort
   let l:instance.paths = {}
   let l:instance.cache = {}
   let l:instance.use_cache = v:false
+  let l:instance.cache_used = v:false
   return l:instance
 endfunction
 
@@ -25,6 +26,10 @@ function! s:data.get_item(item) abort
 endfunction
 
 function! s:data.check_cache() abort
+  if self.cache_used
+    return v:false
+  endif
+
   let l:filename = self.cache_filename()
   if filereadable(l:filename)
     let self.cache = json_decode(readfile(l:filename)[0])
@@ -120,6 +125,7 @@ endfunction
 
 function! s:data.use_fresh_data() abort
   let self.use_cache = v:false
+  let self.cache_used = v:true
   let self.cache = {}
 endfunction
 
@@ -183,5 +189,12 @@ function! s:data.cache_to_file() abort
   endif
 
   return writefile([json_encode(self.paths)], l:filename)
+endfunction
+
+function! s:data.clear_project_cache() abort
+  call delete(self.cache_filename())
+  return project_lint#utils#echo_line(
+        \ printf('Deleted cache for project %s', g:project_lint#root)
+        \ )
 endfunction
 

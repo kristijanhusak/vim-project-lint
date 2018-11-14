@@ -86,7 +86,7 @@ function! s:lint.set_running(linter, file) abort
 endfunction
 
 function! s:lint.run_file(file) abort
-  if !self.initialized
+  if !self.initialized || !empty(&buftype)
     return
   endif
 

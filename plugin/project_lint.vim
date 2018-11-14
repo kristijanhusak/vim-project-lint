@@ -12,6 +12,7 @@ let g:project_lint#enabled_linters = get(g:, 'project_lint#enabled_linters', {})
 let g:project_lint#linter_args = get(g:, 'project_lint#linter_args', {})
 let g:project_lint#debug = get(g:, 'project_lint#debug', v:false)
 let g:project_lint#cache_dir = get(g:, 'project_lint#cache_dir', '~/.cache/vim-project-lint')
+let g:project_lint#echo_progress = get(g:, 'project_lint#echo_progress', v:true)
 let g:project_lint#root = project_lint#utils#get_project_root()
 let g:project_lint#file_explorers = project_lint#file_explorers#new()
 let g:project_lint#job = project_lint#job#new()
@@ -36,6 +37,10 @@ endfunction
 function! project_lint#get_data()
   return g:project_lint#data.get()
 endfunction
+
+command! -nargs=0 ProjectLintClearCache call g:project_lint#data.clear_project_cache()
+command! -nargs=0 ProjectLintRun call g:project_lint.run()
+command! -nargs=0 ProjectLintRunFile call g:project_lint.run_file(expand('%:p'))
 
 augroup project_lint
   autocmd!

@@ -4,6 +4,9 @@ function! project_lint#utils#update_statusline() abort
   let l:running_linters = g:project_lint#queue.get_running_linters()
   if empty(l:running_linters.project) && empty(l:running_linters.files)
     let s:statusline = ''
+    if g:project_lint#echo_progress
+      call project_lint#utils#echo_line(s:statusline)
+    endif
     return v:false
   endif
 
@@ -19,8 +22,12 @@ function! project_lint#utils#update_statusline() abort
 
   let l:text = join(l:text, ', ')
 
-  let l:cache_text = g:project_lint#data.use_cache ? 'Loaded from cache. Refreshing': 'Linting'
+  let l:has_cache = !g:project_lint#data.cache_used && g:project_lint#data.use_cache
+  let l:cache_text = l:has_cache ? 'Loaded from cache. Refreshing': 'Linting'
   let s:statusline = printf('%s %s', l:cache_text, l:text)
+  if g:project_lint#echo_progress
+    call project_lint#utils#echo_line(s:statusline)
+  endif
 endfunction
 
 function! project_lint#utils#get_statusline() abort
@@ -28,6 +35,10 @@ function! project_lint#utils#get_statusline() abort
 endfunction
 
 function! project_lint#utils#echo_line(text) abort
+  if empty(a:text)
+    echom ''
+    return
+  endif
   let l:text = a:text
   if type(l:text) !=? type('')
     let l:text = string(l:text)
