@@ -43,8 +43,8 @@ function! project_lint#utils#echo_line(text) abort
   if type(l:text) !=? type('')
     let l:text = string(l:text)
   endif
-  echom printf('[project-lint]: %s', l:text)
   silent! exe 'redraw'
+  echom printf('[project-lint]: %s', l:text)
 endfunction
 
 function! project_lint#utils#error(text) abort
@@ -180,4 +180,17 @@ endfunction
 
 function! project_lint#utils#check_jobs_support() abort
   return has('nvim') || has('job')
+endfunction
+
+function! project_lint#utils#get_directories_up_to(from, to) abort
+  let l:start = fnamemodify(a:from, ':p:h')
+  let l:end = fnamemodify(a:to, ':p:h')
+  let l:result = []
+  while l:start !=? l:end
+    call add(l:result, l:start)
+    let l:start = fnamemodify(l:start, ':h')
+  endwhile
+
+  call add(l:result, l:end)
+  return l:result
 endfunction

@@ -50,7 +50,7 @@ function! s:lint.handle_dir_change(event) abort
 endfunction
 
 function! s:lint.run() abort
-  if !self.initialized
+  if !self.initialized || self.is_project_ignored()
     return
   endif
 
@@ -86,7 +86,7 @@ function! s:lint.set_running(linter, file) abort
 endfunction
 
 function! s:lint.run_file(file) abort
-  if !self.initialized || !empty(&buftype)
+  if !self.initialized || !empty(&buftype) || self.is_project_ignored()
     return
   endif
 
@@ -128,11 +128,15 @@ function! s:lint.single_job_finished(linter, is_queue_empty, trigger_callbacks, 
     return
   endif
 
-  call project_lint#utils#debug(printf(
+  call project_lint#utils#debug(
         \ 'All linters finished running. Switching to fresh data and caching it to a file.'
-        \ ))
+        \ )
   let self.running = v:false
   call self.data.use_fresh_data()
   call call(self.file_explorers.trigger_callbacks, a:000)
   return self.data.cache_to_file()
+endfunction
+
+function! s:lint.is_project_ignored() abort
+  return index(g:project_lint#ignored_folders, g:project_lint#root) > -1
 endfunction
