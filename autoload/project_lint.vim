@@ -116,7 +116,11 @@ function! s:lint.single_job_finished(linter, is_queue_empty, trigger_callbacks, 
   call project_lint#utils#debug(printf('Linter [%s] for [%s] finished.', a:linter.name, l:type))
   call project_lint#utils#update_statusline()
 
-  if a:trigger_callbacks
+  if a:trigger_callbacks && !a:is_queue_empty
+    call project_lint#utils#debug(printf(
+          \ 'Refreshing file explorer after linter [%s] finished linting [%s].'
+          \ , a:linter.name,
+          \ l:type))
     call call(self.file_explorers.trigger_callbacks, a:000)
   endif
 
@@ -124,6 +128,9 @@ function! s:lint.single_job_finished(linter, is_queue_empty, trigger_callbacks, 
     return
   endif
 
+  call project_lint#utils#debug(printf(
+        \ 'All linters finished running. Switching to fresh data and caching it to a file.'
+        \ ))
   let self.running = v:false
   call self.data.use_fresh_data()
   call call(self.file_explorers.trigger_callbacks, a:000)

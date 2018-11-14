@@ -28,12 +28,12 @@ function! project_lint#utils#get_statusline() abort
 endfunction
 
 function! project_lint#utils#echo_line(text) abort
-  silent! exe 'redraw'
   let l:text = a:text
   if type(l:text) !=? type('')
     let l:text = string(l:text)
   endif
   echom printf('[project-lint]: %s', l:text)
+  silent! exe 'redraw'
 endfunction
 
 function! project_lint#utils#error(text) abort
