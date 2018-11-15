@@ -3,10 +3,10 @@ let s:statusline = ''
 function! project_lint#utils#update_statusline() abort
   let l:running_linters = g:project_lint#queue.get_running_linters()
   if empty(l:running_linters.project) && empty(l:running_linters.files)
-    let s:statusline = ''
-    if g:project_lint#echo_progress
-      call project_lint#utils#echo_line(s:statusline)
+    if g:project_lint#echo_progress && !empty(s:statusline)
+      call project_lint#utils#echo_line('')
     endif
+    let s:statusline = ''
     return v:false
   endif
 
