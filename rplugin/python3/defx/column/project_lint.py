@@ -1,5 +1,5 @@
 # ============================================================================
-# FILE: git.py
+# FILE: project_lint.py
 # AUTHOR: Kristijan Husak <husakkristijan at gmail.com>
 # License: MIT license
 # ============================================================================

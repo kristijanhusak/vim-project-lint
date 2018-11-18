@@ -1,4 +1,4 @@
-*vim-project-lint.txt*    Project lint status right in your file explorer.
+*vim-project-lint.txt* *project-lint.txt*   Project lint status right in your file explorer.
 
         Project lint status right in your file explorer.
 
@@ -9,18 +9,21 @@ vim-project-lint			    *vim-project-lint*
 
 1. Introduction				|vim-project-lint-introduction|
 2. Install				|vim-project-lint-install|
-3. Settings				|vim-project-lint-settings|
-4. Functions				|vim-project-lint-functions|
-5. Available linters			|vim-project-lint-linters|
-  5.1 Javascript			|vim-project-lint-linter-javascript|
-    5.1.1 eslint			|vim-project-lint-linter-eslint|
-  5.2 python				|vim-project-lint-linter-python|
-    5.2.1 mypy				|vim-project-lint-linter-mypy|
-    5.2.2 flake8			|vim-project-lint-linter-flake8|
-  5.3 go				|vim-project-lint-linter-go|
-    5.3.1 go vet			|vim-project-lint-linter-govet|
-  5.4 vimscript				|vim-project-lint-linter-vimscript|
-    5.5.1 vint				|vim-project-lint-linter-vint|
+3. How it works				|vim-project-lint-how-it-works|
+4. Settings				|vim-project-lint-settings|
+5. Functions				|vim-project-lint-functions|
+6. Commands				|vim-project-lint-commands|
+7. Available linters			|vim-project-lint-linters|
+  7.1 Javascript			|vim-project-lint-linter-javascript|
+    7.1.1 eslint			|vim-project-lint-linter-eslint|
+  7.2 python				|vim-project-lint-linter-python|
+    7.2.1 mypy				|vim-project-lint-linter-mypy|
+    7.2.2 flake8			|vim-project-lint-linter-flake8|
+  7.3 go				|vim-project-lint-linter-go|
+    7.3.1 go vet			|vim-project-lint-linter-govet|
+  7.4 vimscript				|vim-project-lint-linter-vimscript|
+    7.4.1 vint				|vim-project-lint-linter-vint|
+8. Custom Linters 			|vim-project-lint-custom-linters|
 
 ==============================================================================
 1. Introduction					*vim-project-lint-introduction*
@@ -38,19 +41,22 @@ Main features:
 3. After all linters are ran, presents the state in the file explorer using flags
 4. Updates the status for each file after it is written to disc (BufWritePost)
 
-
 ==============================================================================
 2. Install					*vim-project-lint-install*
 
 Requirements:
-
 - Vim or Neovim with "jobs" feature
 - One of these file explorers:
 1. NERDTree - https://github.com/scrooloose/nerdtree
 2. Defx.nvim - https://github.com/Shougo/defx.nvim
 2. Vimfiler.vim - https://github.com/Shougo/vimfiler.vim
 
-Install with `vim-packager`(https://github.com/Kristijanhusak/vim-packager):J
+Optional, but highly recommended for best performance:
+* ripgrep https://github.com/BurntSushi/ripgrep
+or
+* ag https://github.com/ggreer/the_silver_searcher
+
+Install with `vim-packager` https://github.com/Kristijanhusak/vim-packager:
 >
   function! PackagerInit()
     packadd vim-packager
@@ -61,6 +67,7 @@ Install with `vim-packager`(https://github.com/Kristijanhusak/vim-packager):J
     "or...
     call packager#add('Shougo/defx.nvim')
     "or...
+    call packager#add('Shougo/unite.vim')
     call packager#add('Shougo/vimfiler.vim')
     " ... Other plugins
   endfunction
@@ -68,7 +75,7 @@ Install with `vim-packager`(https://github.com/Kristijanhusak/vim-packager):J
   command! PackagerInstall call PackagerInit() | call packager#install()
 <
 
-Or if you prefer `Plug` (https://github.com/junegunn/vim-plug)
+Or if you prefer `Plug` https://github.com/junegunn/vim-plug
 >
   Plug 'kristijanhusak/vim-project-lint'
   "File explorers. Choose your favorite
@@ -76,32 +83,83 @@ Or if you prefer `Plug` (https://github.com/junegunn/vim-plug)
   "or...
   Plug 'Shougo/defx.nvim'
   "or...
+  Plug 'Shougo/unite.vim'
   Plug 'Shougo/vimfiler.vim'
-<
-==============================================================================
-3. Settings					*vim-project-lint-settings*
 
-							*g:project_lint#error_icon*
+==============================================================================
+3. How it works					*vim-project-lint-how-it-works*
+
+After Vim starts, several steps are done:
+1. Project root is detected.
+2. All filetypes that currently have linters are detected.
+3. Runs all linters in parallel and updates the file explorer with the status
+
+Short explanation of each step:
+1. Project root is detected.
+  Project root is detected by several things. Here's the list by priority:
+    1. Folder that has `.vimprojectlint` file
+    2. Git repository folder (`git rev-parse --show-toplevel`)
+    3. Current working directory (`getcwd()`)
+
+2. Filetypes detected.
+  Using external tools or `glob()`, files with specific extensions are found.
+  It's recommended to install [ripgrep](https://github.com/BurntSushi/ripgrep)
+  or [ag](https://github.com/ggreer/the_silver_searcher). If none of those are
+  found, fallbacks to `find` or Vim's `glob()`
+
+3. Runs all linters
+  Self explanatory. Progress can be viewed in command line or statusline
+  |project_lint#statusline|
+
+
+==============================================================================
+4. Settings					*vim-project-lint-settings*
+
+						*g:project_lint#error_icon*
 g:project_lint#error_icon
-		Which icon to use to mark invalid files in file explorer.
+		Which icon to use to mark files with errors in file explorer.
 		Example: `let g:project_lint#error_icon = 'x'`
 
-		Default: `●`
-						  *g:project_lint#error_icon_color*
+		Default: `✖`
+
+						*g:project_lint#error_icon_color*
 g:project_lint#error_icon_color
 		Which color to use for the |g:project_lint#error_icon|
 
 		Example of strict red: `guifg=#FF000`
 
 		Default: `guifg=#fb4934 ctermfg=167`
-					      *g:project_lint#exclude_linters*
-g:project_lint#exclude_linters
-		List of linter names that should not be used, even if they are
-		available.
 
-		Example: `let g:project_lint#exclude_linters = ['mypy']`
+						*g:project_lint#warning_icon*
+g:project_lint#warning_icon
+		Which icon to use to mark files with warnings in file explorer.
+		Example: `let g:project_lint#warning_icon = '-'`
 
-		Default: `[]`
+		Default: `⚠`
+
+						*g:project_lint#warning_icon_color*
+g:project_lint#warning_icon_color
+		Which color to use for the |g:project_lint#warning_icon|
+
+		Example of yellowish: `guifg=#FFFF00
+
+		Default: `guifg=#fabd2f ctermfg=214`
+
+					      *g:project_lint#enabled_linters*
+g:project_lint#enabled_linters
+		Set enabled linters per filetype.
+		When filetype is not defined here, all available linters are
+		used.
+		When set to empty array, no linting is done for that
+		filetype.
+
+		Example:
+>
+		let g:project_lint#enabled_linters = {'javascript': ['eslint'], 'python': ['mypy']}
+<
+
+		Default: `{}`
+
 					      *g:project_lint#linter_args*
 g:project_lint#linter_args
 		Dict containing additional arguments that are passed to
@@ -113,6 +171,7 @@ g:project_lint#linter_args
 		  `\ }`
 
 		Default: `{}`
+
 					      *g:project_lint#cache_dir*
 g:project_lint#cache_dir
 		Each project lint status is cached into a file, which is used
@@ -121,8 +180,33 @@ g:project_lint#cache_dir
 
 		Default: `~/.cache/vim-project-lint`
 
+					      *g:project_lint#ignored_folders*
+g:project_lint#ignored_folders
+		Which folders to ignore.
+		When left empty, all folders from `$HOME` and above are
+		ignored and not linted.
+		To completely disable this variable (not recommended), set it
+		to `v:false`
+		When provided as non-empty array, only those folders are
+		ignored, which means above defaults are not applied.
+
+		Default: `$HOME and up (ex: ['/home/kristijan', '/home', '/'])`
+
+					      *g:project_lint#echo_progress*
+g:project_lint#echo_progress
+		Print linting progress in command line.
+
+		Default: `v:true`
+
+					      *g:project_lint#debug*
+g:project_lint#debug
+		Print all linter commands and their outputs in command line.
+                Mostly useful for development and debugging.
+
+		Default: `v:false`
+
 ==============================================================================
-3. Functions					*vim-project-lint-functions*
+5. Functions					*vim-project-lint-functions*
 
 						  *project_lint#statusline()*
 project_lint#statusline()
@@ -134,40 +218,91 @@ project_lint#statusline()
 		`Linting project with: ['eslint', 'mypy']`
 
 		Example output (Single file linting):
+		`Linting file with: ['eslint', 'mypy']`
 
 ==============================================================================
-5. Available Linters				*vim-project-lint-linters*
+6. Commands					*vim-project-lint-commands*
+
+						  *ProjectLintRun*
+ProjectLintRun
+		Re-run linting of the project manually. Will not work if
+		there's currently linting in progress.
+
+						  *ProjectLintRunFile*
+ProjectLintRunFile
+		Run linting of the current file. Will not work if
+		there's currently linting in progress.
+		This is also automatically triggered after file is saved.
+
+						  *ProjectLintClearCache*
+ProjectLintClearCache
+		Clear cache data of the current project.
+
+==============================================================================
+7. Available Linters				*vim-project-lint-linters*
 
 Below linters are available.
 
 ==============================================================================
-5.1 Javascript			     *vim-project-lint-linters-javascript*
+7.1 Javascript			     *vim-project-lint-linters-javascript*
 
 ==============================================================================
-5.1.1 Eslint			     *vim-project-lint-linters-esilnt*
+7.1.1 Eslint			     *vim-project-lint-linters-esilnt*
 
 ==============================================================================
-5.2 Python			     *vim-project-lint-linters-python*
+7.2 Python			     *vim-project-lint-linters-python*
 
 ==============================================================================
-5.2.1 mypy			     *vim-project-lint-linters-mypy*
+7.2.1 mypy			     *vim-project-lint-linters-mypy*
 
 ==============================================================================
-5.2.2 flake8			     *vim-project-lint-linters-flake8*
+7.2.2 flake8			     *vim-project-lint-linters-flake8*
 
 ==============================================================================
-5.3 Go				     *vim-project-lint-linters-go*
+7.3 Go				     *vim-project-lint-linters-go*
 
 ==============================================================================
-5.3.1 go vet			     *vim-project-lint-linters-govet*
+7.3.1 go vet			     *vim-project-lint-linters-govet*
 
 aliased as `govet`
 
 ==============================================================================
-5.4 Vimscript			     *vim-project-lint-linters-viscript*
+7.4 Vimscript			     *vim-project-lint-linters-viscript*
 
 ==============================================================================
-5.4.1 vint			     *vim-project-lint-linters-vint*
+7.4.1 vint			     *vim-project-lint-linters-vint*
 
 ==============================================================================
+8. Custom linters			     *vim-project-lint-custom-linters*
+
+All currently available linters live in `project_linters` folder.
+All linters should extend `project_lint#base_linter#get()` , and have few
+custom defined methods and properties:
+
+Properties:
+1. `name` - Linter name. This is used for allowing configuration per linter.
+2. `filetype` - List of filetypes to apply this linter to. Must be array.
+3. `cmd_args` - Arguments to pass to linter command. Most of the time it
+contains only desired output format.
+
+1. `check_executable()` - Check if linter executable exists in the system and
+attach it to the linter instance
+2. `command()` - system command to use for project level linting
+3. `file_command(file)` - system command to use for file linting
+4. `parse(item)` - parse linter output into dictionary readable by project
+lint.
+
+Other methods can be overwritten, but most of the time that's not necessary.
+
+For more information check these files:
+* `autoload/project_lint/base_linter.vim`
+* Any linter in `project_linters` folder.
+
+Note: Whole project lint plugin is written mostly in OOP style
+(For more info, see
+http://got-ravings.blogspot.com/2008/09/vim-pr0n-prototype-based-objects.html
+).
+
+==============================================================================
+
 vim:tw=78:ts=8:ft=help:norl:noet:fen:noet:
