@@ -1,6 +1,4 @@
 # Vim project lint
-**Note**: Still in beta.
-
 Project level lint status right in your favorite file explorer.
 
 Tested on:

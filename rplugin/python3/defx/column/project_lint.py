@@ -15,7 +15,7 @@ class Column(Base):
     def __init__(self, vim: Nvim) -> None:
         super().__init__(vim)
         self.name = 'project_lint'
-        self.column_length = 2
+        self.column_length = self.vim.vars['project_lint#defx_column_length']
         self.error_icon: str = self.vim.vars['project_lint#error_icon']
         self.error_color: str = self.vim.vars['project_lint#error_icon_color']
         self.warning_icon: str = self.vim.vars['project_lint#warning_icon']
