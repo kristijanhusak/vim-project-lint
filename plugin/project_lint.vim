@@ -15,6 +15,7 @@ let g:project_lint#cache_dir = get(g:, 'project_lint#cache_dir', '~/.cache/vim-p
 let g:project_lint#echo_progress = get(g:, 'project_lint#echo_progress', v:true)
 let g:project_lint#ignored_folders = get(g:, 'project_lint#ignored_folders', [])
 let g:project_lint#defx_column_length = get(g:, 'project_lint#defx_column_length', 1)
+let g:project_lint#init_delay = get(g:, 'project_lint#init_delay', 1000)
 
 let g:project_lint#root = project_lint#utils#get_project_root()
 let g:project_lint#file_explorers = project_lint#file_explorers#new()

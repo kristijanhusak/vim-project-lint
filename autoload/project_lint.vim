@@ -24,10 +24,18 @@ function! s:lint.init() abort
   if !self.file_explorers.has_valid_file_explorer()
     return project_lint#utils#error('No file explorer found. Install NERDTree, defx.nvim or vimfiler.')
   endif
+
+  if has('timers')
+    return timer_start(g:project_lint#init_delay, self.setup)
+  endif
+
+  return self.setup()
+endfunction
+
+function! s:lint.setup(...) abort
   call self.linters.load()
   call self.file_explorers.register()
   let self.initialized = v:true
-
   return self.run()
 endfunction
 
